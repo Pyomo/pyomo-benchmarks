@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+import subprocess
+import sys
+import csv
+import os
+import os.path
+
+
+versions = []
+
+with open('versions/install.csv', 'r') as f:
+    reader = csv.reader(f)
+    flag = True
+    for row in reader:
+        if flag:
+            header = row
+            flag = False
+            continue
+        versions.append( row )
+
+header += ['Name', 'Replications', 'Min', 'Mean', 'Max', 'Stddev']
+
+os.chdir('benchmarks')
+
+print("Running experiment: %s" % sys.argv[1])
+
+for row in versions:
+    dirname, pyver, release = row
+    print("")
+    print("Version: %s" % dirname)
+    print("")
+    subprocess.run([os.path.abspath('../versions/%s/bin/python' % dirname), sys.argv[1]+'.py', "%s_%s.csv" % (sys.argv[1], dirname)] + row)
+
+#
+# Combine benchmark data
+#
+with open('%s.csv' % sys.argv[1], 'w') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(header)
+    for v in versions:
+        dirname, pyver, release = v
+        with open('%s_%s.csv' % (sys.argv[1], dirname), 'r') as csvresults:
+            reader = csv.reader(csvresults)
+            for row in reader:
+                writer.writerow(row)
+
+
