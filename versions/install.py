@@ -8,23 +8,37 @@ import shutil
 import csv
 
 
-#python = ['pypy', 'python3.6', 'python2.7']
-python = ['python3.6']
-pyomo_version    = ['.master', '.expr_dev', '5.3', '5.2', '5.1',   '5.0']
-pyutilib_version = ['5.6',     '5.6',       '5.6', '5.5', '5.4.1', '5.4.1']
+config = {
+'python3.6':
+{
+'pyomo_version':    ['.master', '.expr_dev', '5.3', '5.2'],
+'pyutilib_version': ['5.6',     '5.6',       '5.6', '5.5']
+},
+'python3.5':
+{
+'pyomo_version':    ['.master', '.expr_dev', '5.3', '5.2', '5.1.1', '5.0.01'],
+'pyutilib_version': ['5.6',     '5.6',       '5.6', '5.5', '5.4.1', '5.4.1']
+},
+'python2.7':
+{
+'pyomo_version':    ['.master', '.expr_dev', '5.3', '5.2', '5.1.1', '5.0.01'],
+'pyutilib_version': ['5.6',     '5.6',       '5.6', '5.5', '5.4.1', '5.4.1']
+}
+}
+
 
 csvinfo = [['directory', 'python', 'pyomo']]
 
-for p in python:
-    for i in range(len(pyomo_version)):
-        pyomo = pyomo_version[i]
-        pyutilib = pyutilib_version[i]
+for python in config:
+    for i in range(len(config[python]['pyomo_version'])):
+        pyomo = config[python]['pyomo_version'][i]
+        pyutilib = config[python]['pyutilib_version'][i]
         if pyomo[0] == '.':
-            testdir = "%s_%s" % (p,pyomo[1:])
-            csvinfo.append([testdir, p, pyomo[1:]])
+            testdir = "%s_%s" % (python,pyomo[1:])
+            csvinfo.append([testdir, python, pyomo[1:]])
         else:
-            testdir = "%s_%s" % (p,pyomo)
-            csvinfo.append([testdir, p, pyomo])
+            testdir = "%s_%s" % (python,pyomo)
+            csvinfo.append([testdir, python, pyomo])
 
         print("")
         print("DIRECTORY: "+testdir)
@@ -34,8 +48,8 @@ for p in python:
             continue
             #shutil.rmtree(testdir)
 
-        subprocess.run(['virtualenv', '-p', p, testdir])
-        if p.startswith('python'):
+        subprocess.run(['virtualenv', '-p', python, testdir])
+        if python.startswith('python'):
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'cython'])
         if pyomo[0] == '.':
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'PyUtilib'])
