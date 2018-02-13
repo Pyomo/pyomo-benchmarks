@@ -4,15 +4,21 @@ import signal
 import os
 import sys
 import csv
+import statistics
 
-from pyomo.version import version_info
-if version_info <= (5,3):
-    expr_dev = False
-    from pyomo.repn import generate_ampl_repn
-else:
-    expr_dev = True
+if len(sys.argv) == 1:
+    raise RuntimeError("Missing command-line argument:  expr.py <filename.csv> [<col1> <col2> ...]")
+if os.path.exists(sys.argv[1]):
+    print("  Skipping benchmark because file '%s' exists" % sys.argv[1])
+    sys.exit(0)
+
+try:
     import pyomo.core.expr.current as EXPR
     from pyomo.repn import generate_standard_repn
+    expr_dev = True
+except:
+    from pyomo.repn import generate_ampl_repn
+    expr_dev = False
 
 
 class TimeoutError(Exception):
@@ -438,8 +444,10 @@ else:
                 expr = func()
             if repn:
                 generate_ampl_repn(expr)
-        except:
+        except TimeoutError:
             pass
+        except:
+            raise
 
 
 data = []
@@ -449,9 +457,11 @@ for name in ['const', 'simple', 'param', 'mutable', 'nested', 'bilinear', 'nonl'
     for i in range(1,7):
         timer = timeit.Timer('run(%s%d, True)' % (name,i), 'from __main__ import run, %s%d' % (name,i))
         try:
-            data.append( [name, i, 1, min(timer.repeat(R, number=1))] )
-        except ImportError:
-            data.append( [name, i, 1, None] )
+            values = timer.repeat(R, number=1)
+            data.append( [name+"_%d" % i, R, min(values), statistics.mean(values), max(values), statistics.stdev(values)] )
+        except:
+            data.append( [name+"_%d" % i, R, None, None, None, None] )
+            #pass
         sys.stdout.write(".")
         sys.stdout.flush()
     sys.stdout.write("\n")
