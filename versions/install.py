@@ -11,23 +11,23 @@ import csv
 config = {
 'python3.6':
 {
-'pyomo_version':    ['.master', '.expr_dev', '5.3', '5.2'],
-'pyutilib_version': ['5.6',     '5.6',       '5.6', '5.5']
+'pyomo_version':    ['5.2', '5.3', '.master', '.expr_dev'],
+'pyutilib_version': ['5.5', '5.6', '5.6',     '5.6']
 },
 'python3.5':
 {
-'pyomo_version':    ['.master', '.expr_dev', '5.3', '5.2', '5.1.1', '5.0.01'],
-'pyutilib_version': ['5.6',     '5.6',       '5.6', '5.5', '5.4.1', '5.4.1']
+'pyomo_version':    ['5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
+'pyutilib_version': ['5.4.1', '5.5', '5.6', '5.6',     '5.6']
 },
 'python2.7':
 {
-'pyomo_version':    ['.master', '.expr_dev', '5.3', '5.2', '5.1.1', '5.0.01'],
-'pyutilib_version': ['5.6',     '5.6',       '5.6', '5.5', '5.4.1', '5.4.1']
+'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
+'pyutilib_version': ['5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
 },
 'pypy':
 {
-'pyomo_version':    ['.master', '.expr_dev', '5.3', '5.2', '5.1.1', '5.0.01'],
-'pyutilib_version': ['5.6',     '5.6',       '5.6', '5.5', '5.4.1', '5.4.1']
+'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
+'pyutilib_version': ['5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
 }
 }
 
@@ -56,6 +56,8 @@ for python in config:
         subprocess.run(['virtualenv', '-p', python, testdir])
         if python.startswith('python'):
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'cython'])
+        if python == 'pypy' or python == 'python2.7':
+            subprocess.run(['%s/bin/pip' % testdir, 'install', 'statistics'])
         if pyomo[0] == '.':
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'PyUtilib'])
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'git+git://github.com/Pyomo/pyomo.git@%s' % pyomo[1:]])
