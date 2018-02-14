@@ -8,7 +8,11 @@ if len(sys.argv) == 1:
     print("dog <id>")
     sys.exit(0)
 
-if sys.argv[1] == "1":
+if sys.argv[1] == "1" or sys.argv[1] == "2":
+    skip = []
+    if sys.argv[1] == "2":
+        skip.append('simple_4')
+        skip.append('simple_5')
     #
     # Read expr.csv
     #
@@ -43,10 +47,10 @@ if sys.argv[1] == "1":
     for python in p:
         for line in p[python]:
             if line.startswith('simple'):
-                if line == 'simple_6':
+                if line in skip:
                     continue
-                x_ = [0]*len(labels[python])
-                y_ = [0]*len(labels[python])
+                x_ = [-1]*len(labels[python])
+                y_ = [-1]*len(labels[python])
                 print(line)
                 print(p[python][line])
                 for x,y in p[python][line]:
@@ -55,15 +59,24 @@ if sys.argv[1] == "1":
                     y_[i] = y
                 print(x_)
                 print(y_)
-                plt.plot(x_, y_, label=line)
+                x__ = []
+                y__ = []
+                for i in range(len(x_)):
+                    if x_[i] != -1:
+                        x__.append(x_[i])
+                        y__.append(y_[i])
+                if len(x__) == 1:
+                    plt.plot(x__, y__, 'o', markersize=3, label=line)
+                else:
+                    plt.plot(x__, y__, label=line)
 
         plt.xlabel("X Label")
         plt.ylabel("Y Label")
         plt.title(python)
         plt.legend()
 
-        print(labels[python])
-        plt.xticks(x_, labels[python])
+        #print(labels[python])
+        plt.xticks(range(len(labels[python])), labels[python])
         plt.show()
     
 
