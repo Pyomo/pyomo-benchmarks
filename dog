@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+import sys
+import matplotlib.pyplot as plt
+import csv
+
+if len(sys.argv) == 1:
+    print("dog <id>")
+    sys.exit(0)
+
+if sys.argv[1] == "1":
+    #
+    # Read expr.csv
+    #
+    data = []
+    with open('benchmarks/expr.csv', 'r') as f:
+        reader = csv.reader(f)
+        flag = True
+        for row in reader:
+            if flag:
+                header = row
+                flag = False
+                continue
+            data.append( row )
+    p = {}
+    labels = {}
+    for row in data:
+        if row[1] not in labels:
+            labels[row[1]] = []
+        if not row[2] in labels[row[1]]:
+            labels[row[1]].append(row[2])
+        if row[6] == "":
+            continue
+
+        if row[1] not in p:
+            p[row[1]] = {}
+        if row[3] not in p[row[1]]:
+            p[row[1]][row[3]] = set()
+        p[row[1]][row[3]].add((row[2], float(row[6])))
+    #
+    # Plot 
+    #
+    for python in p:
+        for line in p[python]:
+            if line.startswith('simple'):
+                if line == 'simple_6':
+                    continue
+                x_ = [0]*len(labels[python])
+                y_ = [0]*len(labels[python])
+                print(line)
+                print(p[python][line])
+                for x,y in p[python][line]:
+                    i = labels[python].index(x)
+                    x_[i] = i
+                    y_[i] = y
+                print(x_)
+                print(y_)
+                plt.plot(x_, y_, label=line)
+
+        plt.xlabel("X Label")
+        plt.ylabel("Y Label")
+        plt.title(python)
+        plt.legend()
+
+        print(labels[python])
+        plt.xticks(x_, labels[python])
+        plt.show()
+    
+
+sys.exit(0)
+
+
+import csv
+import os
+import os.path
+
+
+versions = []
+
+with open('versions/install.csv', 'r') as f:
+    reader = csv.reader(f)
+    flag = True
+    for row in reader:
+        if flag:
+            header = row
+            flag = False
+            continue
+        versions.append( row )
+
+header += ['Name', 'Replications', 'Min', 'Mean', 'Max', 'Stddev']
+
+os.chdir('benchmarks')
+
+print("Running experiment: %s" % sys.argv[1])
+
+for row in versions:
+    dirname, pyver, release = row
+    print("")
+    print("Version: %s" % dirname)
+    print("")
+    subprocess.run([os.path.abspath('../versions/%s/bin/python' % dirname), sys.argv[1]+'.py', "%s_%s.csv" % (sys.argv[1], dirname)] + row)
+
+#
+# Combine benchmark data
+#
+with open('%s.csv' % sys.argv[1], 'w') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(header)
+    for v in versions:
+        dirname, pyver, release = v
+        with open('%s_%s.csv' % (sys.argv[1], dirname), 'r') as csvresults:
+            reader = csv.reader(csvresults)
+            for row in reader:
+                writer.writerow(row)
+
+
