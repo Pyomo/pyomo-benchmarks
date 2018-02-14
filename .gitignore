@@ -100,6 +100,7 @@ ENV/
 # mypy
 .mypy_cache/
 
+*.pdf
 *.csv
 versions/pypy_*
 versions/python*
