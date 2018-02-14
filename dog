@@ -2,6 +2,7 @@
 
 import sys
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import csv
 
 if len(sys.argv) == 1:
@@ -9,6 +10,9 @@ if len(sys.argv) == 1:
     sys.exit(0)
 
 if sys.argv[1] == "1" or sys.argv[1] == "2":
+    pp = PdfPages('dog%s.pdf' % sys.argv[1])
+    print("Creating dog%s.pdf" % sys.argv[1])
+
     skip = []
     if sys.argv[1] == "2":
         skip.append('simple_4')
@@ -51,14 +55,14 @@ if sys.argv[1] == "1" or sys.argv[1] == "2":
                     continue
                 x_ = [-1]*len(labels[python])
                 y_ = [-1]*len(labels[python])
-                print(line)
-                print(p[python][line])
+                #print(line)
+                #print(p[python][line])
                 for x,y in p[python][line]:
                     i = labels[python].index(x)
                     x_[i] = i
                     y_[i] = y
-                print(x_)
-                print(y_)
+                #print(x_)
+                #print(y_)
                 x__ = []
                 y__ = []
                 for i in range(len(x_)):
@@ -77,53 +81,10 @@ if sys.argv[1] == "1" or sys.argv[1] == "2":
 
         #print(labels[python])
         plt.xticks(range(len(labels[python])), labels[python])
-        plt.show()
-    
+        #plt.show()
+        pp.savefig()
+        plt.clf()
 
-sys.exit(0)
-
-
-import csv
-import os
-import os.path
-
-
-versions = []
-
-with open('versions/install.csv', 'r') as f:
-    reader = csv.reader(f)
-    flag = True
-    for row in reader:
-        if flag:
-            header = row
-            flag = False
-            continue
-        versions.append( row )
-
-header += ['Name', 'Replications', 'Min', 'Mean', 'Max', 'Stddev']
-
-os.chdir('benchmarks')
-
-print("Running experiment: %s" % sys.argv[1])
-
-for row in versions:
-    dirname, pyver, release = row
-    print("")
-    print("Version: %s" % dirname)
-    print("")
-    subprocess.run([os.path.abspath('../versions/%s/bin/python' % dirname), sys.argv[1]+'.py', "%s_%s.csv" % (sys.argv[1], dirname)] + row)
-
-#
-# Combine benchmark data
-#
-with open('%s.csv' % sys.argv[1], 'w') as csvfile:
-    writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(header)
-    for v in versions:
-        dirname, pyver, release = v
-        with open('%s_%s.csv' % (sys.argv[1], dirname), 'r') as csvresults:
-            reader = csv.reader(csvresults)
-            for row in reader:
-                writer.writerow(row)
+    pp.close()
 
 
