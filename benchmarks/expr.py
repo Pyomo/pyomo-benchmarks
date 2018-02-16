@@ -6,12 +6,6 @@ import sys
 import csv
 import statistics
 
-if len(sys.argv) == 1:
-    raise RuntimeError("Missing command-line argument:  expr.py <filename.csv> [<col1> <col2> ...]")
-if os.path.exists(sys.argv[1]):
-    print("  Skipping benchmark because file '%s' exists" % sys.argv[1])
-    sys.exit(0)
-
 try:
     import pyomo.core.expr.current as EXPR
     from pyomo.repn import generate_standard_repn
@@ -37,15 +31,7 @@ class timeout:
         signal.alarm(0)
 
 
-N = 100000
-R = 10
-
 model = ConcreteModel()
-model.A = RangeSet(N)
-model.p = Param(model.A, default=2)
-model.q = Param(model.A, default=2, mutable=True)
-model.x = Var(model.A, initialize=2)
-model.y = Var(model.A, initialize=3)
 
 
 # CONST:    sum_i 2 * q_i
@@ -429,7 +415,7 @@ def nonl10():
 
 
 if expr_dev:
-    def run(func, repn=False):
+    def trial(func, repn=False):
         try:
             with timeout(10):
                 expr = func()
@@ -438,7 +424,7 @@ if expr_dev:
         except:
             pass
 else:
-    def run(func, repn=False):
+    def trial(func, repn=False):
         try:
             with timeout(10):
                 expr = func()
@@ -450,24 +436,43 @@ else:
             raise
 
 
-data = []
+def run(N, R, args):
 
-for name in ['const', 'simple', 'param', 'mutable', 'nested', 'bilinear', 'nonl']:
-    sys.stdout.write(name+" ")
-    for i in range(1,7):
-        timer = timeit.Timer('run(%s%d, True)' % (name,i), 'from __main__ import run, %s%d' % (name,i))
-        try:
-            values = timer.repeat(R, number=1)
-            data.append( [name+"_%d" % i, R, min(values), statistics.mean(values), max(values), statistics.stdev(values)] )
-        except:
-            data.append( [name+"_%d" % i, R, None, None, None, None] )
-            #pass
-        sys.stdout.write(".")
-        sys.stdout.flush()
-    sys.stdout.write("\n")
+    if len(args) == 1:
+        raise RuntimeError("Missing filename")
+    if os.path.exists(args[1]):
+        print("  Skipping benchmark generation because file '%s' exists" % args[1])
+        sys.exit(0)
 
-with open(sys.argv[1], 'w') as csvfile:
-    writer = csv.writer(csvfile, delimiter=',')
-    for line in data:
-        writer.writerow(sys.argv[2:] + line)
+    model.A = RangeSet(N)
+    model.p = Param(model.A, default=2)
+    model.q = Param(model.A, default=2, mutable=True)
+    model.x = Var(model.A, initialize=2)
+    model.y = Var(model.A, initialize=3)
+
+    data = []
+
+    for name in ['const', 'simple', 'param', 'mutable', 'nested', 'bilinear', 'nonl']:
+        sys.stdout.write(name+" ")
+        for i in range(1,7):
+            timer = timeit.Timer('trial(%s%d, True)' % (name,i), 'from expr import trial, %s%d' % (name,i))
+            try:
+                values = timer.repeat(R, number=1)
+                data.append( [name+"_%d" % i, R, min(values), statistics.mean(values), max(values), statistics.stdev(values)] )
+            except:
+                data.append( [name+"_%d" % i, R, None, None, None, None] )
+            sys.stdout.write(".")
+            sys.stdout.flush()
+        sys.stdout.write("\n")
+
+    with open(args[1], 'w') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        for line in data:
+            writer.writerow(args[2:] + line)
+
+#if __name__ == '__main__':
+#    #N = 100000
+#    N = 1000
+#    R = 10
+#    run(N, R, sys.argv)
 
