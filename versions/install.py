@@ -14,15 +14,30 @@ config = {
 'pyomo_version':    ['5.2', '5.3', '.master', '.expr_dev'],
 'pyutilib_version': ['5.5', '5.6', '5.6',     '5.6']
 },
+'python3.6_cython':
+{
+'pyomo_version':    ['.expr_dev'],
+'pyutilib_version': ['5.6']
+},
 'python3.5':
 {
 'pyomo_version':    ['5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
 'pyutilib_version': ['5.4.1', '5.5', '5.6', '5.6',     '5.6']
 },
+'python3.5_cython':
+{
+'pyomo_version':    ['.expr_dev'],
+'pyutilib_version': ['5.6']
+},
 'python2.7':
 {
 'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
 'pyutilib_version': ['5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
+},
+'python2.7_cython':
+{
+'pyomo_version':    ['.expr_dev'],
+'pyutilib_version': ['5.6']
 },
 'pypy':
 {
@@ -34,7 +49,9 @@ config = {
 
 csvinfo = [['directory', 'python', 'pyomo']]
 
-for python in config:
+for python_ in config:
+    if '_' in python_:
+        python = python_.split('_')[0]
     for i in range(len(config[python]['pyomo_version'])):
         pyomo = config[python]['pyomo_version'][i]
         pyutilib = config[python]['pyutilib_version'][i]
@@ -54,7 +71,7 @@ for python in config:
             #shutil.rmtree(testdir)
 
         subprocess.run(['virtualenv', '-p', python, testdir])
-        if python.startswith('python'):
+        if python_.endswith('cython'):
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'cython'])
         if python == 'pypy' or python == 'python2.7':
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'statistics'])
