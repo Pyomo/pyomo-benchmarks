@@ -6,6 +6,14 @@ import csv
 import os
 import os.path
 
+_i = 1
+if sys.argv[_i] == '--modules':
+    _i += 1
+    using_modules = True
+    modules = {'python3.5':'python35', 'python2.7':'python27', 'python3.6':'python36', 'pypy':'pypy'}
+else:
+    using_modules = False
+expname = sys.argv[_i]
 
 versions = []
 
@@ -23,24 +31,34 @@ header += ['Name', 'Replications', 'Min', 'Mean', 'Max', 'Stddev']
 
 os.chdir('benchmarks')
 
-print("Running experiment: %s" % sys.argv[1])
+print("Running experiment: %s" % expname)
 
 for row in versions:
     dirname, pyver, release = row
     print("")
     print("Version: %s" % dirname)
     print("")
-    subprocess.run([os.path.abspath('../versions/%s/bin/python' % dirname), sys.argv[1]+'.py', "%s_%s.csv" % (sys.argv[1], dirname)] + row)
+    if using_modules:
+        shstr = """#!/bin/sh
+module load %s
+../versions/%s/bin/python %s.py %s_%s.csv %s
+module unload %s
+"""
+        with open('run.sh', 'w') as file:
+            file.write(shstr % (modules[pyver], dirname, expname, expname, dirname, " ".join(row), modules[pyver]))
+        subprocess.run(['/bin/sh', 'run.sh'])
+    else:
+        subprocess.run([os.path.abspath('../versions/%s/bin/python' % dirname), expname+'.py', "%s_%s.csv" % (expname, dirname)] + row)
 
 #
 # Combine benchmark data
 #
-with open('%s.csv' % sys.argv[1], 'w') as csvfile:
+with open('%s.csv' % expname, 'w') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(header)
     for v in versions:
         dirname, pyver, release = v
-        with open('%s_%s.csv' % (sys.argv[1], dirname), 'r') as csvresults:
+        with open('%s_%s.csv' % (expname, dirname), 'r') as csvresults:
             reader = csv.reader(csvresults)
             for row in reader:
                 writer.writerow(row)
