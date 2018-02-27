@@ -8,6 +8,11 @@ import shutil
 import csv
 
 
+version = ['python3.6', 
+'python3.5', 
+'python2.7', 
+'pypy']
+
 config = {
 'python3.6':
 {
@@ -21,8 +26,8 @@ config = {
 },
 'python2.7':
 {
-'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
-'pyutilib_version': ['5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
+'pyomo_version':    ['4.0.9682', '4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
+'pyutilib_version': ['5.0',      '5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
 },
 'pypy':
 {
@@ -34,7 +39,7 @@ config = {
 
 csvinfo = [['directory', 'python', 'pyomo']]
 
-for python in config:
+for python in version:
     for i in range(len(config[python]['pyomo_version'])):
         pyomo = config[python]['pyomo_version'][i]
         pyutilib = config[python]['pyutilib_version'][i]
@@ -53,17 +58,19 @@ for python in config:
             continue
             #shutil.rmtree(testdir)
 
-        subprocess.run(['virtualenv', '-p', python, testdir])
+        #subprocess.call(['virtualenv', '-p', python, testdir])
+        subprocess.call([python, '/home/wehart/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
         if python.startswith('python'):
-            subprocess.run(['%s/bin/pip' % testdir, 'install', 'cython'])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'cython'])
         if python == 'pypy' or python == 'python2.7':
-            subprocess.run(['%s/bin/pip' % testdir, 'install', 'statistics'])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'statistics'])
+        subprocess.call(['%s/bin/pip' % testdir, 'install', 'six'])
         if pyomo[0] == '.':
-            subprocess.run(['%s/bin/pip' % testdir, 'install', 'PyUtilib'])
-            subprocess.run(['%s/bin/pip' % testdir, 'install', 'git+git://github.com/Pyomo/pyomo.git@%s' % pyomo[1:]])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'PyUtilib'])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'git+git://github.com/Pyomo/pyomo.git@%s' % pyomo[1:]])
         else:
-            subprocess.run(['%s/bin/pip' % testdir, 'install', 'PyUtilib==%s' % pyutilib])
-            subprocess.run(['%s/bin/pip' % testdir, 'install', 'Pyomo==%s' % pyomo])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'PyUtilib==%s' % pyutilib])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'Pyomo==%s' % pyomo])
 
 
 #
