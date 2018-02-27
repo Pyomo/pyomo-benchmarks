@@ -19,15 +19,30 @@ config = {
 'pyomo_version':    ['5.2', '5.3', '.master', '.expr_dev'],
 'pyutilib_version': ['5.5', '5.6', '5.6',     '5.6']
 },
+'python3.6_cython':
+{
+'pyomo_version':    ['.expr_dev'],
+'pyutilib_version': ['5.6']
+},
 'python3.5':
 {
 'pyomo_version':    ['5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
 'pyutilib_version': ['5.4.1', '5.5', '5.6', '5.6',     '5.6']
 },
+'python3.5_cython':
+{
+'pyomo_version':    ['.expr_dev'],
+'pyutilib_version': ['5.6']
+},
 'python2.7':
 {
 'pyomo_version':    ['4.0.9682', '4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '.master', '.expr_dev'],
 'pyutilib_version': ['5.0',      '5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
+},
+'python2.7_cython':
+{
+'pyomo_version':    ['.expr_dev'],
+'pyutilib_version': ['5.6']
 },
 'pypy':
 {
@@ -39,7 +54,9 @@ config = {
 
 csvinfo = [['directory', 'python', 'pyomo']]
 
-for python in version:
+for python_ in version:
+    if '_' in python_:
+        python = python_.split('_')[0]
     for i in range(len(config[python]['pyomo_version'])):
         pyomo = config[python]['pyomo_version'][i]
         pyutilib = config[python]['pyutilib_version'][i]
@@ -60,8 +77,8 @@ for python in version:
 
         #subprocess.call(['virtualenv', '-p', python, testdir])
         subprocess.call([python, '/home/wehart/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
-        if python.startswith('python'):
-            subprocess.call(['%s/bin/pip' % testdir, 'install', 'cython'])
+        if python_.endswith('cython'):
+            subprocess.run(['%s/bin/pip' % testdir, 'install', 'cython'])
         if python == 'pypy' or python == 'python2.7':
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'statistics'])
         subprocess.call(['%s/bin/pip' % testdir, 'install', 'six'])
