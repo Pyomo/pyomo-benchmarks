@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# run [--modules] expr10
+
 import subprocess
 import sys
 import csv
@@ -10,7 +12,8 @@ _i = 1
 if sys.argv[_i] == '--modules':
     _i += 1
     using_modules = True
-    modules = {'python3.5':'python35', 'python2.7':'python27', 'python3.6':'python36', 'pypy':'pypy'}
+    modules = {'python3.5':'python35', 'python2.7':'python27', 'python3.6':'python36', 'pypy':'pypy',
+               'python3.5-cython':'python35', 'python2.7-cython':'python27', 'python3.6-cython':'python36'}
 else:
     using_modules = False
 expname = sys.argv[_i]
