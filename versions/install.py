@@ -9,8 +9,11 @@ import csv
 
 
 version = ['python3.6', 
+'python3.6-cython',
 'python3.5', 
+'python3.5-cython',
 'python2.7', 
+'python2.7-cython',
 'pypy']
 
 config = {
@@ -19,7 +22,7 @@ config = {
 'pyomo_version':    ['5.2', '5.3', '-master', '-expr_dev'],
 'pyutilib_version': ['5.5', '5.6', '5.6',     '5.6']
 },
-'python3.6_cython':
+'python3.6-cython':
 {
 'pyomo_version':    ['-expr_dev'],
 'pyutilib_version': ['5.6']
@@ -29,7 +32,7 @@ config = {
 'pyomo_version':    ['5.1.1', '5.2', '5.3', '-master', '-expr_dev'],
 'pyutilib_version': ['5.4.1', '5.5', '5.6', '5.6',     '5.6']
 },
-'python3.5_cython':
+'python3.5-cython':
 {
 'pyomo_version':    ['-expr_dev'],
 'pyutilib_version': ['5.6']
@@ -39,7 +42,7 @@ config = {
 'pyomo_version':    ['4.0.9682', '4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '-master', '-expr_dev'],
 'pyutilib_version': ['5.0',      '5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
 },
-'python2.7_cython':
+'python2.7-cython':
 {
 'pyomo_version':    ['-expr_dev'],
 'pyutilib_version': ['5.6']
@@ -55,19 +58,19 @@ config = {
 csvinfo = [['directory', 'python', 'pyomo']]
 
 for python_ in version:
-    if '_' in python_:
-        python = python_.split('_')[0]
+    if '-' in python_:
+        python = python_.split('-')[0]
     else:
         python = python_
-    for i in range(len(config[python]['pyomo_version'])):
-        pyomo = config[python]['pyomo_version'][i]
-        pyutilib = config[python]['pyutilib_version'][i]
+    for i in range(len(config[python_]['pyomo_version'])):
+        pyomo = config[python_]['pyomo_version'][i]
+        pyutilib = config[python_]['pyutilib_version'][i]
         if pyomo[0] == '-':
-            testdir = "%s-%s" % (python,pyomo[1:])
-            csvinfo.append([testdir, python, pyomo[1:]])
+            testdir = "%s-%s" % (python_,pyomo[1:])
+            csvinfo.append([testdir, python_, pyomo[1:]])
         else:
-            testdir = "%s-%s" % (python,pyomo)
-            csvinfo.append([testdir, python, pyomo])
+            testdir = "%s-%s" % (python_, pyomo)
+            csvinfo.append([testdir, python_, pyomo])
 
         print("")
         print("DIRECTORY: "+testdir)
