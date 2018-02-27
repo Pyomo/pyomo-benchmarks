@@ -23,7 +23,7 @@ legend['simple_6'] = 'Sum()'
 # Read expr.csv
 #
 data = []
-with open('benchmarks/expr100000.csv', 'r') as f:
+with open('benchmarks/expr10.csv', 'r') as f:
     reader = csv.reader(f)
     flag = True
     for row in reader:
@@ -69,20 +69,33 @@ if sys.argv[1] == "1" or sys.argv[1] == "2":
     if sys.argv[1] == "2":
         skip.append('simple_4')
         skip.append('simple_5')
+
+    line_colors = {'simple_1':'r', 'simple_2':'g', 'simple_3':'b', 'simple_4':'c', 'simple_5':'m', 'simple_6':'y'}
+
     #
     # Plot 
     #
-    for python in p:
-        for line in p[python]:
+    for python_ in p:
+        if python_.endswith('cython'):
+            continue
+
+        pversions = [python_]
+        if python_+'-cython' in p:
+            pversions.append( python_+'-cython' )
+
+        for python in pversions:
+          for line in p[python]:
             if line.startswith('simple'):
                 if line in skip:
                     continue
-                x_ = [-1]*len(labels[python])
-                y_ = [-1]*len(labels[python])
+                #if python.endswith('cython') and not i == 6:
+                #    continue
+                x_ = [-1]*len(labels[python_])
+                y_ = [-1]*len(labels[python_])
                 #print(line)
                 #print(p[python][line])
                 for x in p[python][line]:
-                    i = labels[python].index(x)
+                    i = labels[python_].index(x)
                     x_[i] = i
                     y_[i] = p[python][line][x]
                 #print(x_)
@@ -94,17 +107,20 @@ if sys.argv[1] == "1" or sys.argv[1] == "2":
                         x__.append(x_[i])
                         y__.append(y_[i])
                 if len(x__) == 1:
-                    plt.plot(x__, y__, 'o', markersize=3, label=legend[line])
+                    if python.endswith('cython'):
+                        plt.plot(x__, y__, 'o', markersize=3, label="cy: "+legend[line], c=line_colors[line])
+                    else:
+                        plt.plot(x__, y__, 'X', markersize=3, label=legend[line], c=line_colors[line])
                 else:
-                    plt.plot(x__, y__, label=legend[line])
+                    plt.plot(x__, y__, label=legend[line], c=line_colors[line])
 
         plt.xlabel("X Label")
         plt.ylabel("Y Label")
-        plt.title("Simple Expressions: %s" % (python))
+        plt.title("Simple Expressions: %s" % (python_))
         plt.legend()
 
         #print(labels[python])
-        plt.xticks(range(len(labels[python])), labels[python])
+        plt.xticks(range(len(labels[python_])), xticks[python_])
         #plt.show()
         pp.savefig()
         plt.clf()
@@ -190,7 +206,7 @@ elif sys.argv[1] == "4":
         plt.legend()
 
         #print(labels[python])
-        plt.xticks(range(len(labels[python])), labels[python])
+        plt.xticks(range(len(labels[python])), xticks[python])
         #plt.show()
         pp.savefig()
         plt.clf()
