@@ -19,18 +19,18 @@ version = ['python3.6',
 config = {
 'python3.6':
 {
-'pyomo_version':    ['5.2', '5.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.5', '5.6', '5.6',     '5.6']
+'pyomo_version':    ['5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
+'pyutilib_version': ['5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
 },
 'python3.6-cython':
 {
 'pyomo_version':    ['-expr_dev'],
-'pyutilib_version': ['5.6']
+'pyutilib_version': ['5.6.2']
 },
 'python3.5':
 {
-'pyomo_version':    ['5.1.1', '5.2', '5.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.4.1', '5.5', '5.6', '5.6',     '5.6']
+'pyomo_version':    ['5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
+'pyutilib_version': ['5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
 },
 'python3.5-cython':
 {
@@ -39,18 +39,18 @@ config = {
 },
 'python2.7':
 {
-'pyomo_version':    ['4.0.9682', '4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.0',      '5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
+'pyomo_version':    ['4.0.9682', '4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
+'pyutilib_version': ['5.0',      '5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
 },
 'python2.7-cython':
 {
 'pyomo_version':    ['-expr_dev'],
-'pyutilib_version': ['5.6']
+'pyutilib_version': ['5.6.2']
 },
 'pypy':
 {
-'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.4', '5.4.1', '5.5', '5.6', '5.6',     '5.6']
+'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
+'pyutilib_version': ['5.4', '5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
 }
 }
 
