@@ -9,7 +9,9 @@ import statistics
 import pyutilib.subprocess
 from functools import partial
 import re
+import platform
 
+implementation = platform.python_implementation()
 exdir = os.path.abspath(os.getcwd()+'/../models')
 auxdir = os.path.abspath(os.getcwd()+'/../pyomo-models')
 
@@ -193,8 +195,6 @@ def run(R, large, verbose, args):
         problems = [
                 (pmedian1,      8, True),
                 (pmedian2,      8, True),
-                (bilinear1,     100000, True),
-                (bilinear2,     100000, True),
                 (diag1,         100000, True),
                 (diag2,         100000, True),
                 (jump_opf,      6620, False),
@@ -203,6 +203,9 @@ def run(R, large, verbose, args):
                 #(jump_clnlbeam, 500000, False),
                 (jump_lqcp,     0, False)
                 ]
+        if implementation == 'CPython':
+            problems.append( (bilinear1,     100000, True) )
+            problems.append( (bilinear2,     100000, True) )
     else:
         problems = [
                 (pmedian1,      4, True),
@@ -214,12 +217,18 @@ def run(R, large, verbose, args):
                 (jump_opf,      662, False),
                 (jump_clnlbeam, 5000, False),
                 ]
+        if implementation == 'CPython':
+            problems.append( (bilinear1,     100, True) )
+            problems.append( (bilinear2,     100, True) )
     problems.append( (stochpdegas1,     0, False) )
     problems.append( (jump_facility,    0, False) )
 
     if os.path.exists(auxdir):
         problems.append( (dcopf1,           0, True) )
         problems.append( (uc1,              0, True) )
+
+    # FOR DEBUGGING
+    problems = [(pmedian1,      4, True), (diag1,         100, True)]
 
     data = []
 
@@ -234,11 +243,18 @@ def run(R, large, verbose, args):
             f = partial(fn, format_, name, num, verbose)()
             try:
                 values = measure(f, n=R)
+                totals = []
                 for key in values[0]:
                     if key == 'transformations':
                         continue
                     vals = [trial[key] for trial in values]
+                    if len(totals) == 0:
+                        totals = vals
+                    else:
+                        for i in range(len(totals)):
+                            totals[i] += vals[i]
                     data.append( [name+"_%d" % num, format_, key, R, min(vals), statistics.mean(vals), max(vals), statistics.stdev(vals)] )
+                data.append( [name+"_%d" % num, format_, "total", R, min(totals), statistics.mean(totals), max(totals), statistics.stdev(totals)] )
             except:
                 data.append( [name+"_%d" % num, format_, key, R, None, None, None, None] )
         sys.stdout.write("\n")
