@@ -436,7 +436,7 @@ else:
             raise
 
 
-def run(N, R, args):
+def run(N, R, args, skip=False):
 
     if len(args) == 1:
         raise RuntimeError("Missing filename")
@@ -452,9 +452,14 @@ def run(N, R, args):
 
     data = []
 
+    if skip:
+        ids = [1,2,3,6]
+    else:
+        ids = list(range(1,7))
+
     for name in ['const', 'simple', 'param', 'mutable', 'nested', 'bilinear', 'nonl']:
         sys.stdout.write(name+" ")
-        for i in range(1,7):
+        for i in ids:
             timer = timeit.Timer('trial(%s%d, True)' % (name,i), 'from expr import trial, %s%d' % (name,i))
             try:
                 values = timer.repeat(R, number=1)

@@ -4,4 +4,4 @@ import sys
 N = 100000
 R = 10
 
-expr.run(N, R, sys.argv)
+expr.run(N, R, sys.argv, skip=True)
