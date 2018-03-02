@@ -23,7 +23,7 @@ legend['simple_6'] = 'Sum()'
 # Read expr.csv
 #
 data = []
-with open('benchmarks/expr10.csv', 'r') as f:
+with open('benchmarks/expr100000.csv', 'r') as f:
     reader = csv.reader(f)
     flag = True
     for row in reader:
@@ -110,7 +110,7 @@ if sys.argv[1] == "1" or sys.argv[1] == "2":
                     if python.endswith('cython'):
                         plt.plot(x__, y__, 'o', markersize=3, label="cy: "+legend[line], c=line_colors[line])
                     else:
-                        plt.plot(x__, y__, 'X', markersize=3, label=legend[line], c=line_colors[line])
+                        plt.plot(x__, y__, '+', markersize=7, label=legend[line], c=line_colors[line])
                 else:
                     plt.plot(x__, y__, label=legend[line], c=line_colors[line])
 
@@ -137,13 +137,13 @@ elif sys.argv[1] == "3":
             if not line.endswith('_1'):
                 continue
             name = line[:-2]
-            x_ = [-1]*len(labels[python])
-            y_ = [-1]*len(labels[python])
+            x_ = [-1]*len(labels[python_])
+            y_ = [-1]*len(labels[python_])
 
-            for i in range(len(labels[python])):
-                if labels[python][i] in p[python]["%s_4" % name]:
+            for i in range(len(labels[python_])):
+                if labels[python_][i] in p[python]["%s_4" % name]:
                     x_[i] = i
-                    y_[i] = p[python]["%s_4" % name][labels[python][i]] / p[python]["%s_1" % name][labels[python][i]]
+                    y_[i] = p[python]["%s_4" % name][labels[python_][i]] / p[python]["%s_1" % name][labels[python_][i]]
 
             x__ = []
             y__ = []
@@ -162,7 +162,7 @@ elif sys.argv[1] == "3":
         plt.legend()
 
         #print(labels[python])
-        plt.xticks(range(len(labels[python])), labels[python])
+        plt.xticks(range(len(labels[python_])), labels[python_])
         #plt.show()
         pp.savefig()
         plt.clf()
@@ -176,18 +176,26 @@ elif sys.argv[1] == "4":
 
     line_colors = {'simple':'r', 'const':'g', 'param':'b', 'mutable':'c', 'nonl':'m', 'bilinear':'y', 'nested':'k'}
 
-    for python in p:
-        for line in p[python]:
-            if not line.endswith('_1') and not line.endswith('_6'):
+    for python_ in p:
+        if python_.endswith('cython'):
+            continue
+
+        pversions = [python_]
+        if python_+'-cython' in p:
+            pversions.append( python_+'-cython' )
+
+        for python in pversions:
+          for line in p[python]:
+            if not line.endswith('_1'):
                 continue
             name = line[:-2]
-            x_ = [-1]*len(labels[python])
-            y_ = [-1]*len(labels[python])
+            x_ = [-1]*len(labels[python_])
+            y_ = [-1]*len(labels[python_])
 
-            for i in range(len(labels[python])):
-                if labels[python][i] in p[python][line]:
+            for i in range(len(labels[python_])):
+                if labels[python_][i] in p[python][line]:
                     x_[i] = i
-                    y_[i] = p[python][line][labels[python][i]]
+                    y_[i] = p[python][line][labels[python_][i]]
 
             x__ = []
             y__ = []
@@ -196,7 +204,10 @@ elif sys.argv[1] == "4":
                     x__.append(x_[i])
                     y__.append(y_[i])
             if len(x__) == 1:
-                plt.plot(x__, y__, 'o', markersize=3, c=line_colors[name])
+                if python.endswith('cython'):
+                    plt.plot(x__, y__, 'o', markersize=3, label="cy: "+line, c=line_colors[name])
+                else:
+                    plt.plot(x__, y__, '+', markersize=7, label=line, c=line_colors[name])
             else:
                 plt.plot(x__, y__, label=line, c=line_colors[name])
     
@@ -206,7 +217,7 @@ elif sys.argv[1] == "4":
         plt.legend()
 
         #print(labels[python])
-        plt.xticks(range(len(labels[python])), xticks[python])
+        plt.xticks(range(len(labels[python_])), xticks[python_])
         #plt.show()
         pp.savefig()
         plt.clf()
