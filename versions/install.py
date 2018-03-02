@@ -39,8 +39,8 @@ config = {
 },
 'python2.7':
 {
-'pyomo_version':    ['4.0.9682', '4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.0',      '5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
+'pyomo_version':    ['4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
+'pyutilib_version': ['5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
 },
 'python2.7-cython':
 {
@@ -80,8 +80,8 @@ for python_ in version:
             continue
             #shutil.rmtree(testdir)
 
-        #subprocess.call(['virtualenv', '-p', python, testdir])
-        subprocess.call([python, '/home/wehart/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
+        subprocess.call(['virtualenv', '-p', python, testdir])
+        #subprocess.call([python, '/home/wehart/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
         if python_.endswith('cython'):
             subprocess.run(['%s/bin/pip' % testdir, 'install', 'cython'])
         if python == 'pypy' or python == 'python2.7':
