@@ -7,6 +7,7 @@ import os
 import shutil
 import csv
 
+using_modules = True
 
 version = ['python3.6', 
 'python3.6-cython',
@@ -80,10 +81,12 @@ for python_ in version:
             continue
             #shutil.rmtree(testdir)
 
-        #subprocess.call(['virtualenv', '-p', python, testdir])
-        subprocess.call([python, '/home/wehart/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
+        if using_modules:
+            subprocess.call([python, '/home/wehart/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
+        else:
+            subprocess.call(['virtualenv', '-p', python, testdir])
         if python_.endswith('cython'):
-            subprocess.run(['%s/bin/pip' % testdir, 'install', 'cython'])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'cython'])
         if python == 'pypy' or python == 'python2.7':
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'statistics'])
         subprocess.call(['%s/bin/pip' % testdir, 'install', 'six'])
