@@ -5,49 +5,93 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import csv
 
+colors = ['xkcd:pink', 'xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange', 
+          'xkcd:light blue', 'xkcd:teal', 'xkcd:magenta', 'xkcd:yellow', 'xkcd:grey',
+          'xkcd:light purple', 'xkcd:turquoise', 'xkcd:cyan', 'xkcd:muave', 'xkcd:maroon',
+          'xkcd:olive', 'xkcd:salmon', 'xkcd:beige', 'xkcd:navy blue', 'xkcd:black', 
+          'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey']
+
 if len(sys.argv) == 1:
     print("dog <id>")
     sys.exit(0)
 
-legend = {}
-legend['simple_1'] = 'sum()'
-legend['simple_2'] = 'summation()'
-legend['simple_3'] = 'loop (e += t)'
-legend['simple_4'] = 'loop (e = e + t)'
-legend['simple_5'] = 'loop (e = t + e)'
-legend['simple_6'] = 'Sum()'
-
-#
-# Read expr.csv
-#
-data = []
-with open('benchmarks/expr10.csv', 'r') as f:
-    reader = csv.reader(f)
-    flag = True
-    for row in reader:
-        if flag:
-            header = row
-            flag = False
+if int(sys.argv[1]) < 10:
+    input = 'benchmarks/expr10.csv'
+    legend = {}
+    legend['simple_1'] = 'sum()'
+    legend['simple_2'] = 'summation()'
+    legend['simple_3'] = 'loop (e += t)'
+    legend['simple_4'] = 'loop (e = e + t)'
+    legend['simple_5'] = 'loop (e = t + e)'
+    legend['simple_6'] = 'Sum()'
+    #
+    # Read input file
+    #
+    data = []
+    with open(input, 'r') as f:
+        reader = csv.reader(f)
+        flag = True
+        for row in reader:
+            if flag:
+                header = row
+                flag = False
+                continue
+            data.append( row )
+    #
+    # Process data
+    #
+    p = {}
+    labels = {}
+    for row in data:
+        if row[1] not in labels:
+            labels[row[1]] = []
+        if not row[2] in labels[row[1]]:
+            labels[row[1]].append(row[2])
+        if row[6] == "":
             continue
-        data.append( row )
-#
-# Process data
-#
-p = {}
-labels = {}
-for row in data:
-    if row[1] not in labels:
-        labels[row[1]] = []
-    if not row[2] in labels[row[1]]:
-        labels[row[1]].append(row[2])
-    if row[6] == "":
-        continue
 
-    if row[1] not in p:
-        p[row[1]] = {}
-    if row[3] not in p[row[1]]:
-        p[row[1]][row[3]] = {}
-    p[row[1]][row[3]][row[2]] = float(row[6])
+        if row[1] not in p:
+            p[row[1]] = {}
+        if row[3] not in p[row[1]]:
+            p[row[1]][row[3]] = {}
+        p[row[1]][row[3]][row[2]] = float(row[6])
+
+else:
+    input = 'benchmarks/convertS.csv'
+
+    #
+    # Read input file
+    #
+    data = []
+    with open(input, 'r') as f:
+        reader = csv.reader(f)
+        flag = True
+        for row in reader:
+            if flag:
+                header = row
+                flag = False
+                continue
+            data.append( row )
+    #
+    # Process data
+    #
+    p = {}
+    labels = {}
+    for row in data:
+        if row[1] not in labels:
+            labels[row[1]] = []
+        if not row[2] in labels[row[1]]:
+            labels[row[1]].append(row[2])
+        if row[8] == "":
+            continue
+
+        if row[1] not in p:
+            p[row[1]] = {}
+        if row[3] not in p[row[1]]:
+            p[row[1]][row[3]] = {}
+        if row[2] not in p[row[1]][row[3]]:
+            p[row[1]][row[3]][row[2]] = {}
+        p[row[1]][row[3]][row[2]][row[4], row[5]] = float(row[8])
 
 
 if sys.argv[1] == "1" or sys.argv[1] == "2":
@@ -147,7 +191,7 @@ elif sys.argv[1] == "4":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
     print("Creating dog%s.pdf" % sys.argv[1])
 
-    line_colors = {'simple':'r', 'const':'g', 'param':'b', 'mutable':'c', 'nonl':'m', 'bilinear':'y', 'nested':'k'}
+    line_colors = {'simple':colors[0], 'const':colors[1], 'param':colors[2], 'mutable':colors[3], 'nonl':colors[4], 'bilinear':colors[5], 'nested':colors[6]}
 
     for python in p:
         for line in p[python]:
@@ -181,6 +225,72 @@ elif sys.argv[1] == "4":
         #print(labels[python])
         plt.xticks(range(len(labels[python])), labels[python])
         #plt.show()
+        pp.savefig()
+        plt.clf()
+
+    pp.close()
+
+
+#
+# convert
+#
+
+elif sys.argv[1] == "10":
+    pp = PdfPages('dog%s.pdf' % sys.argv[1])
+    print("Creating dog%s.pdf" % sys.argv[1])
+
+    lines = []
+    for python in p:
+        for line in p[python]:
+            if not line in lines:
+                lines.append(line)
+
+            for label in p[python][line]:
+                for a, b in p[python][line][label]:
+                    if b != 'total':
+                        continue
+                    print(python, line, label, (a,b), p[python][line][label][a,b])
+    
+    for python in p:
+        print(labels[python])
+
+    for format_ in ('nl', 'lp'):
+      for python in p:
+        for line in p[python]:
+            print(list(p[python][line][labels[python][0]].keys()))
+            if not (format_, 'total') in p[python][line][labels[python][0]]:
+                continue
+            x_ = [-1]*len(labels[python])
+            y_ = [-1]*len(labels[python])
+
+            for i in range(len(labels[python])):
+                if labels[python][i] in p[python][line]:
+                    x_[i] = i
+                    try:
+                        y_[i] = p[python][line][labels[python][i]][format_, 'total']
+                    except KeyError:
+                        print(python, line, labels[python][i])
+                        print(list(p[python][line][labels[python][i]].keys()))
+                        #sys.exit(0)
+                        raise
+
+            x__ = []
+            y__ = []
+            for i in range(len(x_)):
+                if x_[i] != -1:
+                    x__.append(x_[i])
+                    y__.append(y_[i])
+            if len(x__) == 1:
+                plt.plot(x__, y__, 'o', markersize=3, c=colors[lines.index(line)])
+            else:
+                plt.plot(x__, y__, label=line, c=colors[lines.index(line)])
+    
+        plt.xlabel("Pyomo Releases/Branches")
+        plt.ylabel("Runtime")
+        plt.title("Model Construction Times: %s" % (python))
+        plt.legend()
+
+        plt.xticks(range(len(labels[python])), labels[python])
         pp.savefig()
         plt.clf()
 
