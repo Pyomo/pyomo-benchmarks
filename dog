@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import csv
 
-colors = ['xkcd:pink', 'xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange', 
+colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange', 
           'xkcd:light blue', 'xkcd:teal', 'xkcd:magenta', 'xkcd:yellow', 'xkcd:grey',
           'xkcd:light purple', 'xkcd:turquoise', 'xkcd:cyan', 'xkcd:muave', 'xkcd:maroon',
           'xkcd:olive', 'xkcd:salmon', 'xkcd:beige', 'xkcd:navy blue', 'xkcd:black', 
-          'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey']
+          'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey', 'xkcd:pink']
 
 if len(sys.argv) == 1:
     print("dog <id>")
@@ -80,6 +80,7 @@ else:
     #
     p = {}
     labels = {}
+    xticks = {}
     for row in data:
         if row[1] not in labels:
             labels[row[1]] = []
@@ -283,19 +284,9 @@ elif sys.argv[1] == "10":
             if not line in lines:
                 lines.append(line)
 
-            for label in p[python][line]:
-                for a, b in p[python][line][label]:
-                    if b != 'total':
-                        continue
-                    print(python, line, label, (a,b), p[python][line][label][a,b])
-    
-    for python in p:
-        print(labels[python])
-
     for format_ in ('nl', 'lp'):
       for python in p:
         for line in p[python]:
-            print(list(p[python][line][labels[python][0]].keys()))
             if not (format_, 'total') in p[python][line][labels[python][0]]:
                 continue
             x_ = [-1]*len(labels[python])
@@ -325,10 +316,64 @@ elif sys.argv[1] == "10":
     
         plt.xlabel("Pyomo Releases/Branches")
         plt.ylabel("Runtime")
-        plt.title("Model Construction Times: %s" % (python))
+        plt.title("Time to Create a %s File: %s" % (format_, python))
         plt.legend()
 
-        plt.xticks(range(len(labels[python])), labels[python])
+        plt.xticks(range(len(labels[python])), xticks[python])
+        pp.savefig()
+        plt.clf()
+
+    pp.close()
+
+
+elif sys.argv[1] == "11":
+    pp = PdfPages('dog%s.pdf' % sys.argv[1])
+    print("Creating dog%s.pdf" % sys.argv[1])
+
+    lines = []
+    for python in p:
+        for line in p[python]:
+            if not line in lines:
+                lines.append(line)
+
+    for format_ in ('nl', 'lp'):
+      for python in p:
+        for line in p[python]:
+            if not (format_, 'total') in p[python][line][labels[python][0]]:
+                continue
+            x_ = [-1]*len(labels[python])
+            y_ = [-1]*len(labels[python])
+
+            for i in range(len(labels[python])):
+                if labels[python][i] in p[python][line]:
+                    x_[i] = i
+                    try:
+                        y_[i] = p[python][line][labels[python][i]][format_, 'total']
+                    except KeyError:
+                        print(python, line, labels[python][i])
+                        print(list(p[python][line][labels[python][i]].keys()))
+                        #sys.exit(0)
+                        raise
+
+            x__ = []
+            y__ = []
+            for i in range(len(x_)):
+                if x_[i] != -1:
+                    x__.append(x_[i])
+                    y__.append(y_[i])
+            for i in range(len(y__)):
+                y__[i] = y__[i]/max(y__[0],1e-7)
+            if len(x__) == 1:
+                plt.plot(x__, y__, 'o', markersize=3, c=colors[lines.index(line)])
+            else:
+                plt.plot(x__, y__, label=line, c=colors[lines.index(line)])
+    
+        plt.xlabel("Pyomo Releases/Branches")
+        plt.ylabel("Runtime")
+        plt.title("Time to Create a %s File: %s" % (format_, python))
+        plt.legend()
+
+        plt.xticks(range(len(labels[python])), xticks[python])
         pp.savefig()
         plt.clf()
 
