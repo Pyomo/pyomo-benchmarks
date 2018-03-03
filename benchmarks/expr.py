@@ -1,4 +1,7 @@
 from pyomo.environ import *
+import platform
+import pyomo.version
+import datetime
 import timeit
 import signal
 import os
@@ -489,13 +492,7 @@ else:
             raise
 
 
-def run(N, R, args, skip=False):
-
-    if len(args) == 1:
-        raise RuntimeError("Missing filename")
-    if os.path.exists(args[1]):
-        print("  Skipping benchmark generation because file '%s' exists" % args[1])
-        sys.exit(0)
+def run(N, R, rfile, python, release, skip=False):
 
     model.A = RangeSet(N)
     model.p = Param(model.A, default=2)
@@ -503,7 +500,23 @@ def run(N, R, args, skip=False):
     model.x = Var(model.A, initialize=2)
     model.y = Var(model.A, initialize=3)
 
+    results = {}
     data = []
+    if os.path.exists(rfile):
+        print("  Loading results from file '%s'" % rfile)
+        with open(rfile, 'r') as f:
+            reader = csv.reader(f)
+            i = 0
+            for row in reader:
+                if row[0] == python and row[1] == release:
+                    if not (row[0],row[1],row[2]) in results:
+                        results[row[0],row[1],row[2]] = []
+                    results[row[0],row[1],row[2]].append(row)
+                else:
+                    data.append(row)
+                i += 1
+        #print(len(data))
+        #print(len(results))
 
     if skip:
         ids = [1,2,3,6]
@@ -514,23 +527,31 @@ def run(N, R, args, skip=False):
         sys.stdout.write(name+" ")
         for i in ids:
             timer = timeit.Timer('trial(%s%d, True)' % (name,i), 'from expr import trial, %s%d' % (name,i))
+            exp = name+"_%d" % i
+            values = []
             try:
-                values = timer.repeat(R, number=1)
-                data.append( [name+"_%d" % i, R, min(values), statistics.mean(values), max(values), statistics.stdev(values)] )
+                num = R - len(results.get((python, release, exp), []))
+                if num > 0:
+                    values = timer.repeat(num, number=1)
             except:
-                data.append( [name+"_%d" % i, R, None, None, None, None] )
+                pass
+            for row in results.get((python, release, exp), []):
+                data.append(row)
+            for value in values:
+                data.append( [python, release, exp, value, str(datetime.date.today()), platform.node()] )
             sys.stdout.write(".")
             sys.stdout.flush()
         sys.stdout.write("\n")
 
-    with open(args[1], 'w') as csvfile:
+    with open(rfile, 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         for line in data:
-            writer.writerow(args[2:] + line)
+            #print(line)
+            writer.writerow(line)
 
 #if __name__ == '__main__':
 #    #N = 100000
-#    N = 1000
-#    R = 10
-#    run(N, R, sys.argv)
+#    N = 10
+#    R = 6
+#    run(N, R, 'expr10_results.csv', 'dummy')
 
