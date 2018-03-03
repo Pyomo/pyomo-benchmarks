@@ -57,6 +57,7 @@ config = {
 
 
 csvinfo = [['directory', 'python', 'pyomo']]
+baselineinfo = [['directory', 'python', 'pyomo']]
 
 for python_ in version:
     if '-' in python_:
@@ -72,6 +73,7 @@ for python_ in version:
         else:
             testdir = "%s-%s" % (python_, pyomo)
             csvinfo.append([testdir, python_, pyomo])
+            baselineinfo.append([testdir, python_, pyomo])
 
         print("")
         print("DIRECTORY: "+testdir)
@@ -79,7 +81,6 @@ for python_ in version:
         if os.path.exists(testdir):
             print("  Directory exists.  Skipping installation!")
             continue
-            #shutil.rmtree(testdir)
 
         if using_modules:
             subprocess.call([python, '/home/wehart/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
@@ -106,4 +107,8 @@ with open('install.csv', 'w') as csvfile:
     for row in csvinfo:
         writer.writerow(row)
 
+with open('baseline.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile)
+    for row in baselineinfo:
+        writer.writerow(row)
 
