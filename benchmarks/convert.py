@@ -10,10 +10,99 @@ import pyutilib.subprocess
 from functools import partial
 import re
 import platform
+import datetime
 
 implementation = platform.python_implementation()
 exdir = os.path.abspath(os.getcwd()+'/../models')
 auxdir = os.path.abspath(os.getcwd()+'/../pyomo-models')
+
+#
+# Logic to execute test problems
+#
+def pmedian(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/pmedian/pmedian1.py %s/pmedian/pmedian.test%d.dat" % (exdir, exdir, num), verbose)
+
+def pmedian_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/pmedian/pmedian2.py %s/pmedian/pmedian.test%d.dat" % (exdir, exdir, num), verbose)
+
+def bilinear(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/misc/bilinear1_%d.py" % (exdir, num), verbose)
+
+def bilinear_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/misc/bilinear2_%d.py" % (exdir, num), verbose)
+
+def diag(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/misc/diag1_%d.py" % (exdir, num), verbose)
+
+def diag_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/misc/diag2_%d.py" % (exdir, num), verbose)
+
+def stochpdegas1(format_, name, num, verbose):
+    return run_script(format_, "run_stochpdegas1_automatic.py", verbose, cwd='%s/dae/' % exdir)
+
+def jump_clnlbeam(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/jump/clnlbeam.py %s/jump/clnlbeam-%d.dat" % (exdir, exdir, num), verbose)
+
+def jump_facility(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/jump/facility.py" % exdir, verbose)
+
+def jump_facility_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/jump/facility_quick.py" % exdir, verbose)
+
+def jump_lqcp(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/jump/lqcp.py" % exdir, verbose)
+
+def jump_lqcp_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/jump/lqcp_quick.py" % exdir, verbose)
+
+def jump_opf(format_, name, num, verbose):
+    return run_pyomo(format_, "opf_%dbus.py" % num, verbose, cwd='%s/jump/' % exdir)
+
+def jump_opf_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "opf_%dbus_quick.py" % num, verbose, cwd='%s/jump/' % exdir)
+
+def dcopf1(format_, name, num, verbose):
+    return run_script(format_, "perf_test_dcopf_case2383wp.py", verbose, cwd='%s/dcopf/' % auxdir)
+
+def uc1(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/uc/ReferenceModel.py %s/uc/2014-09-01-expected.dat" % (auxdir, auxdir), verbose)
+
+#
+# Configuration of test problems
+#
+problems = [
+    #-------------------------------------------------------------------
+    #FUNCION                NUM         LINEAR      LARGE       EXPR_DEV
+    #-------------------------------------------------------------------
+    (pmedian,               4,          True,       False,      False),
+    (pmedian_quick,         4,          True,       False,      True),
+    (pmedian,               8,          True,       True,       False),
+    (pmedian_quick,         8,          True,       True,       True),
+    (bilinear,              100,        False,      False,      False),
+    (bilinear_quick,        100,        False,      False,      True),
+    (bilinear,              100000,     False,      True,       False),
+    (bilinear_quick,        100000,     False,      True,       True),
+    (diag,                  100,        True,       False,      False),
+    (diag_quick,            100,        True,       False,      True),
+    (diag,                  100000,     True,       True,       False),
+    (diag_quick,            100000,     True,       True,       True),
+    (jump_opf,              662,        False,      False,      False),
+    (jump_opf_quick,        662,        False,      False,      True),
+    (jump_opf,              6620,       False,      True,       False),    #66200
+    (jump_opf_quick,        6620,       False,      True,       True),     #66200
+    (jump_clnlbeam,         5000,       False,      False,      False),
+    (jump_clnlbeam,         50000,      False,      True,       False),    #500000
+    (jump_lqcp,             0,          False,      True,       False),
+    (jump_lqcp_quick,       0,          False,      True,       True),
+    (jump_facility,         0,          False,      None,       False),
+    (jump_facility_quick,   0,          False,      None,       True),
+    (stochpdegas1,          0,          False,      None,       False),
+]
+if os.path.exists(auxdir):
+    problems.append( (dcopf1,           0, True,  None, False) )
+    problems.append( (uc1,              0, True,  None, False) )
+
+
 
 
 class TimeoutError(Exception):
@@ -143,106 +232,44 @@ def run_script(format_, problem, verbose, cwd=None):
     return f
 
 
-def pmedian1(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/pmedian/pmedian1.py %s/pmedian/pmedian.test%d.dat" % (exdir, exdir, num), verbose)
+def run(R, rfile, python, release, large, verbose=False, debug=False):
 
-def pmedian2(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/pmedian/pmedian2.py %s/pmedian/pmedian.test%d.dat" % (exdir, exdir, num), verbose)
+    global problems
+    if debug:
+        problems = [(pmedian, 4, True, None, False), (diag1, 100, True, None, False)]
 
-def bilinear1(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/misc/bilinear1_%d.py" % (exdir, num), verbose)
-
-def bilinear2(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/misc/bilinear2_%d.py" % (exdir, num), verbose)
-
-def diag1(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/misc/diag1_%d.py" % (exdir, num), verbose)
-
-def diag2(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/misc/diag2_%d.py" % (exdir, num), verbose)
-
-def stochpdegas1(format_, name, num, verbose):
-    return run_script(format_, "run_stochpdegas1_automatic.py", verbose, cwd='%s/dae/' % exdir)
-
-def dcopf1(format_, name, num, verbose):
-    return run_script(format_, "perf_test_dcopf_case2383wp.py", verbose, cwd='%s/dcopf/' % auxdir)
-
-def uc1(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/uc/ReferenceModel.py %s/uc/2014-09-01-expected.dat" % (auxdir, auxdir), verbose)
-
-def jump_clnlbeam(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/clnlbeam.py %s/jump/clnlbeam-%d.dat" % (exdir, exdir, num), verbose)
-
-def jump_facility(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/facility.py" % exdir, verbose)
-
-def jump_facility_quick(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/facility_quick.py" % exdir, verbose)
-
-def jump_lqcp(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/lqcp.py" % exdir, verbose)
-
-def jump_lqcp_quick(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/lqcp_quick.py" % exdir, verbose)
-
-def jump_opf(format_, name, num, verbose):
-    return run_pyomo(format_, "opf_%dbus.py" % num, verbose, cwd='%s/jump/' % exdir)
-
-def jump_opf_quick(format_, name, num, verbose):
-    return run_pyomo(format_, "opf_%dbus_quick.py" % num, verbose, cwd='%s/jump/' % exdir)
-
-
-def run(R, large, verbose, args):
-
-    if len(args) == 1:
-        raise RuntimeError("Missing filename")
-    if os.path.exists(args[1]):
-        print("  Skipping benchmark generation because file '%s' exists" % args[1])
-        sys.exit(0)
-
-    if large:
-        problems = [
-                (pmedian1,      8, True),
-                (pmedian2,      8, True),
-                (diag1,         100000, True),
-                (diag2,         100000, True),
-                (jump_opf,      6620, False),
-                (jump_clnlbeam, 50000, False),
-                #(jump_opf,      66200, False),
-                #(jump_clnlbeam, 500000, False),
-                (jump_lqcp,     0, False)
-                ]
-        if implementation == 'CPython':
-            problems.append( (bilinear1,     100000, True) )
-            problems.append( (bilinear2,     100000, True) )
-    else:
-        problems = [
-                (pmedian1,      4, True),
-                (pmedian2,      4, True),
-                (bilinear1,     100, True),
-                (bilinear2,     100, True),
-                (diag1,         100, True),
-                (diag2,         100, True),
-                (jump_opf,      662, False),
-                (jump_clnlbeam, 5000, False),
-                ]
-        if implementation == 'CPython':
-            problems.append( (bilinear1,     100, True) )
-            problems.append( (bilinear2,     100, True) )
-    problems.append( (stochpdegas1,     0, False) )
-    problems.append( (jump_facility,    0, False) )
-
-    if os.path.exists(auxdir):
-        problems.append( (dcopf1,           0, True) )
-        problems.append( (uc1,              0, True) )
-
-    # FOR DEBUGGING
-    problems = [(pmedian1,      4, True), (diag1,         100, True)]
-
+    mykeys = set()
+    results = {}
     data = []
+    if os.path.exists(rfile):
+        print("  Loading results from file '%s'" % rfile)
+        with open(rfile, 'r') as f:
+            reader = csv.reader(f)
+            i = 0
+            for row in reader:
+                if row[0] == python and row[1] == release:
+                    mykeys.add(row[4])
+                    ndx = tuple(row[:5])
+                    if not ndx in results:
+                        results[ndx] = []
+                    results[ndx].append(row)
+                else:
+                    data.append(row)
+                i += 1
 
-    for fn, num, linear in problems:
+    for fn, num, linear, large_, dev_ in problems:
+        #
+        # Skip problems that either don't match the size
+        # specification, or which cannot be run with this
+        # release.
+        #
+        if dev_ and release != 'expr_dev':
+            continue
+        if not (large_ is None or large == large_):
+            continue
+
         name = fn.__name__
+        exp = name+"_%d" % num
         sys.stdout.write(name+" ")
         if linear:
             formats = ['lp', 'nl']
@@ -250,8 +277,19 @@ def run(R, large, verbose, args):
             formats = ['nl']
         for format_ in formats:
             f = partial(fn, format_, name, num, verbose)()
+            values = []
             try:
-                values = measure(f, n=R)
+                R_ = R - len(results.get((python, release, exp, format_, 'total'), []))
+                if R_ > 0:
+                    values = values = measure(f, n=R_)
+            except:
+                pass
+
+            for key in mykeys:
+                for row in results.get((python, release, exp, format_, key), []):
+                    data.append(row)
+
+            if len(values) > 0:
                 totals = []
                 for key in values[0]:
                     if key == 'transformations':
@@ -262,18 +300,18 @@ def run(R, large, verbose, args):
                     else:
                         for i in range(len(totals)):
                             totals[i] += vals[i]
-                    data.append( [name+"_%d" % num, format_, key, R, min(vals), statistics.mean(vals), max(vals), statistics.stdev(vals)] )
-                data.append( [name+"_%d" % num, format_, "total", R, min(totals), statistics.mean(totals), max(totals), statistics.stdev(totals)] )
-            except:
-                data.append( [name+"_%d" % num, format_, key, R, None, None, None, None] )
+                    for val in vals:
+                        data.append( [python, release, exp, format_, key, val, None, str(datetime.date.today()), platform.node()] )
+                for val in totals:
+                    data.append( [python, release, exp, format_, 'total', val, None, str(datetime.date.today()), platform.node()] )
+
         sys.stdout.write("\n")
 
-    with open(args[1], 'w') as csvfile:
+    with open(rfile, 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         for line in data:
-            writer.writerow(args[2:] + line)
+            writer.writerow(line)
 
 if __name__ == '__main__':
-    R = 3
-    run(R, False, True, sys.argv)
+    run(3, 'foo.csv', 'dummy', 'curr', True, True, False)
 
