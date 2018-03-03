@@ -176,11 +176,20 @@ def jump_clnlbeam(format_, name, num, verbose):
 def jump_facility(format_, name, num, verbose):
     return run_pyomo(format_, "%s/jump/facility.py" % exdir, verbose)
 
+def jump_facility_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/jump/facility_quick.py" % exdir, verbose)
+
 def jump_lqcp(format_, name, num, verbose):
     return run_pyomo(format_, "%s/jump/lqcp.py" % exdir, verbose)
 
+def jump_lqcp_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "%s/jump/lqcp_quick.py" % exdir, verbose)
+
 def jump_opf(format_, name, num, verbose):
     return run_pyomo(format_, "opf_%dbus.py" % num, verbose, cwd='%s/jump/' % exdir)
+
+def jump_opf_quick(format_, name, num, verbose):
+    return run_pyomo(format_, "opf_%dbus_quick.py" % num, verbose, cwd='%s/jump/' % exdir)
 
 
 def run(R, large, verbose, args):
