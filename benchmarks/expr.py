@@ -34,9 +34,10 @@ class timeout:
 model = ConcreteModel()
 
 
-# CONST:    sum_i 2 * q_i
+# CONST:    sum_i p_i * q_i
 # SIMPLE:   sum_i x_i
-# PARAM:    sum_i 2 * x_i
+# WEIGHTED: sum_i 2 * x_i
+# PARAM:    sum_i p_i * x_i
 # MUTABLE:  sum_i q_i * x_i
 # NESTED:   sum_i q_i * (1 + x_i)
 # BILINEAR: sum_i y_i * x_i
@@ -142,6 +143,58 @@ def simple10():
     with EXPR.linear_expression as expr:
         for i in model.A:
             expr = model.x[i] + expr
+    return expr
+
+
+
+def weighted1():
+    return sum(2*model.x[i] for i in model.A)
+
+#def weighted2():
+#    return summation(model.p, model.x)
+
+def weighted3():
+    expr=0
+    for i in model.A:
+        expr += 2 * model.x[i]
+    return expr
+
+def weighted4():
+    expr=0
+    for i in model.A:
+        expr = expr + 2 * model.x[i]
+    return expr
+
+def weighted5():
+    expr=0
+    for i in model.A:
+        expr = 2 * model.x[i] + expr
+    return expr
+
+def weighted6():
+    return Sum(2*model.x[i] for i in model.A)
+
+def weighted7():
+    with EXPR.linear_expression as expr:
+        expr=sum((2*model.x[i] for i in model.A), expr)
+    return expr
+
+def weighted8():
+    with EXPR.linear_expression as expr:
+        for i in model.A:
+            expr += 2*model.x[i]
+    return expr
+
+def weighted9():
+    with EXPR.linear_expression as expr:
+        for i in model.A:
+            expr = expr + 2*model.x[i]
+    return expr
+
+def weighted10():
+    with EXPR.linear_expression as expr:
+        for i in model.A:
+            expr = 2*model.x[i] + expr
     return expr
 
 
@@ -457,7 +510,7 @@ def run(N, R, args, skip=False):
     else:
         ids = list(range(1,7))
 
-    for name in ['const', 'simple', 'param', 'mutable', 'nested', 'bilinear', 'nonl']:
+    for name in ['const', 'simple', 'weighted', 'param', 'mutable', 'nested', 'bilinear', 'nonl']:
         sys.stdout.write(name+" ")
         for i in ids:
             timer = timeit.Timer('trial(%s%d, True)' % (name,i), 'from expr import trial, %s%d' % (name,i))
