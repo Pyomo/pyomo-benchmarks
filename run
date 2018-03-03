@@ -56,15 +56,14 @@ module unload %s
 #
 # Combine benchmark data
 #
-with open('%s.csv' % expname, 'w') as csvfile:
-    writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(header)
-    for v in versions:
-        dirname, pyver, release = v
-        fname = '%s_%s.csv' % (expname, dirname)
-        with open(fname, 'r') as csvresults:
-            reader = csv.reader(csvresults)
-            for row in reader:
-                writer.writerow(row)
-
+#with open('%s.csv' % expname, 'w') as csvfile:
+#    writer = csv.writer(csvfile, delimiter=',')
+#    writer.writerow(header)
+#    for v in versions:
+#        dirname, pyver, release = v
+#        fname = '%s_%s.csv' % (expname, dirname)
+#        with open(fname, 'r') as csvresults:
+#            reader = csv.reader(csvresults)
+#            for row in reader:
+#                writer.writerow(row)
 
