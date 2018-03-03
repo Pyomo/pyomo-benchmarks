@@ -57,7 +57,7 @@ config = {
 
 
 csvinfo = [['directory', 'python', 'pyomo']]
-baselineinfo = [['directory', 'python', 'pyomo']]
+releaseinfo = [['directory', 'python', 'pyomo']]
 
 for python_ in version:
     if '-' in python_:
@@ -73,7 +73,7 @@ for python_ in version:
         else:
             testdir = "%s-%s" % (python_, pyomo)
             csvinfo.append([testdir, python_, pyomo])
-            baselineinfo.append([testdir, python_, pyomo])
+            releaseinfo.append([testdir, python_, pyomo])
 
         print("")
         print("DIRECTORY: "+testdir)
@@ -107,8 +107,8 @@ with open('install.csv', 'w') as csvfile:
     for row in csvinfo:
         writer.writerow(row)
 
-with open('baseline.csv', 'w') as csvfile:
+with open('release.csv', 'w') as csvfile:
     writer = csv.writer(csvfile)
-    for row in baselineinfo:
+    for row in releaseinfo:
         writer.writerow(row)
 
