@@ -44,14 +44,14 @@ for row in versions:
     if using_modules:
         shstr = """#!/bin/sh
 module load %s
-../versions/%s/bin/python %s.py %s_%s.csv %s
+../versions/%s/bin/python %s.py %s_results.csv %s
 module unload %s
 """
         with open('run.sh', 'w') as file:
             file.write(shstr % (modules[pyver], dirname, expname, expname, dirname, " ".join(row), modules[pyver]))
         subprocess.run(['/bin/sh', 'run.sh'])
     else:
-        subprocess.run([os.path.abspath('../versions/%s/bin/python' % dirname), expname+'.py', "%s_%s.csv" % (expname, dirname)] + row)
+        subprocess.run([os.path.abspath('../versions/%s/bin/python' % dirname), expname+'.py', "%s_results.csv" % expname, pyver, release])
 
 #
 # Combine benchmark data
