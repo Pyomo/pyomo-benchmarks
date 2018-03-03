@@ -538,7 +538,7 @@ def run(N, R, rfile, python, release, skip=False):
             for row in results.get((python, release, exp), []):
                 data.append(row)
             for value in values:
-                data.append( [python, release, exp, value, str(datetime.date.today()), platform.node()] )
+                data.append( [python, release, exp, value, None, str(datetime.date.today()), platform.node()] )
             sys.stdout.write(".")
             sys.stdout.flush()
         sys.stdout.write("\n")
