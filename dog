@@ -8,10 +8,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 import csv
 
 colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange', 
-          'xkcd:light blue', 'xkcd:teal', 'xkcd:magenta', 'xkcd:yellow', 'xkcd:grey',
-          'xkcd:light purple', 'xkcd:turquoise', 'xkcd:cyan', 'xkcd:muave', 'xkcd:maroon',
+          'xkcd:light blue', 'xkcd:teal', 'xkcd:magenta', 'xkcd:grey',
+          'xkcd:turquoise', 'xkcd:cyan', 'xkcd:maroon',
           'xkcd:olive', 'xkcd:salmon', 'xkcd:beige', 'xkcd:navy blue', 'xkcd:black', 
-          'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey', 'xkcd:pink']
+          'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey', 'xkcd:pink', 'xkcd:yellow', 'xkcd:light purple']
 
 if len(sys.argv) == 1:
     print("dog <id>")
@@ -19,6 +19,20 @@ if len(sys.argv) == 1:
 
 if int(sys.argv[1]) < 10:
     input = 'benchmarks/expr10.csv'
+else:
+    input = 'benchmarks/convertS.csv'
+
+#
+# Read input file
+#
+data = []
+with open(input, 'r') as f:
+    reader = csv.reader(f)
+    for row in reader:
+        data.append( row )
+
+
+if int(sys.argv[1]) < 10:
     legend = {}
     legend['simple_1'] = 'sum()'
     legend['simple_2'] = 'summation()'
@@ -27,18 +41,36 @@ if int(sys.argv[1]) < 10:
     legend['simple_5'] = 'loop (e = t + e)'
     legend['simple_6'] = 'Sum()'
     #
-    # Read input file
+    # Process data
     #
-    data = []
-    with open(input, 'r') as f:
-        reader = csv.reader(f)
-        flag = True
-        for row in reader:
-            if flag:
-                header = row
-                flag = False
-                continue
-            data.append( row )
+    p = {}
+    labels = {}
+    xticks = {}
+    for row in data:
+        if row[0] not in labels:
+            labels[row[0]] = []
+        if not row[1] in labels[row[0]]:
+            if row[1] == 'master':
+                append = True
+                for i in range(len(labels[row[0]])):
+                    if labels[row[0]][i][0].isalpha():
+                        labels[row[0]].insert(i, row[1])
+                        append = False
+                        break
+                if append:
+                    labels[row[0]].append(row[1])
+            else:
+                labels[row[0]].append(row[1])
+        if row[4] == "":
+            continue
+
+        if row[0] not in p:
+            p[row[0]] = {}
+        if row[2] not in p[row[0]]:
+            p[row[0]][row[2]] = {}
+        p[row[0]][row[2]][row[1]] = float(row[4])
+
+else:
     #
     # Process data
     #
@@ -46,56 +78,30 @@ if int(sys.argv[1]) < 10:
     labels = {}
     xticks = {}
     for row in data:
-        if row[1] not in labels:
-            labels[row[1]] = []
-        if not row[2] in labels[row[1]]:
-            labels[row[1]].append(row[2])
+        if row[0] not in labels:
+            labels[row[0]] = []
+        if not row[1] in labels[row[0]]:
+            if row[1] == 'master':
+                append = True
+                for i in range(len(labels[row[0]])):
+                    if labels[row[0]][i][0].isalpha():
+                        labels[row[0]].insert(i, row[1])
+                        append = False
+                        break
+                if append:
+                    labels[row[0]].append(row[1])
+            else:
+                labels[row[0]].append(row[1])
         if row[6] == "":
             continue
 
-        if row[1] not in p:
-            p[row[1]] = {}
-        if row[3] not in p[row[1]]:
-            p[row[1]][row[3]] = {}
-        p[row[1]][row[3]][row[2]] = float(row[6])
-
-else:
-    input = 'benchmarks/convertS.csv'
-
-    #
-    # Read input file
-    #
-    data = []
-    with open(input, 'r') as f:
-        reader = csv.reader(f)
-        flag = True
-        for row in reader:
-            if flag:
-                header = row
-                flag = False
-                continue
-            data.append( row )
-    #
-    # Process data
-    #
-    p = {}
-    labels = {}
-    xticks = {}
-    for row in data:
-        if row[1] not in labels:
-            labels[row[1]] = []
-        if not row[2] in labels[row[1]]:
-            labels[row[1]].append(row[2])
-        if row[8] == "":
-            continue
-
-        if row[1] not in p:
-            p[row[1]] = {}
-        if row[3] not in p[row[1]]:
-            p[row[1]][row[3]] = {}
-        if row[2] not in p[row[1]][row[3]]:
-            p[row[1]][row[3]][row[2]] = {}
-        p[row[1]][row[3]][row[2]][row[4], row[5]] = float(row[8])
+        if row[0] not in p:
+            p[row[0]] = {}
+        if row[2] not in p[row[0]]:
+            p[row[0]][row[2]] = {}
+        if row[1] not in p[row[0]][row[2]]:
+            p[row[0]][row[2]][row[1]] = {}
+        p[row[0]][row[2]][row[1]][row[3], row[4]] = float(row[6])
 
 for python in labels:
     xticks[python] = []
@@ -105,6 +111,7 @@ for python in labels:
             xticks[python].append( '.'.join(tmp[:2]) )
         else:
             xticks[python].append(version)
+
 
 if sys.argv[1] == "1" or sys.argv[1] == "2":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
@@ -162,7 +169,9 @@ if sys.argv[1] == "1" or sys.argv[1] == "2":
         plt.xlabel("X Label")
         plt.ylabel("Y Label")
         plt.title("Simple Expressions: %s" % (python_))
-        plt.legend()
+        #plt.legend()
+        #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        plt.legend(loc=2, borderaxespad=0.)
 
         #print(labels[python])
         plt.xticks(range(len(labels[python_])), xticks[python_])
@@ -219,7 +228,7 @@ elif sys.argv[1] == "4":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
     print("Creating dog%s.pdf" % sys.argv[1])
 
-    line_colors = {'simple':colors[0], 'const':colors[1], 'param':colors[2], 'mutable':colors[3], 'nonl':colors[4], 'bilinear':colors[5], 'nested':colors[6]}
+    line_colors = {'simple':colors[0], 'const':colors[1], 'param':colors[2], 'mutable':colors[3], 'nonl':colors[4], 'bilinear':colors[5], 'nested':colors[6], 'weighted':colors[7]}
 
     for python_ in p:
         if python_.endswith('cython'):
@@ -259,7 +268,7 @@ elif sys.argv[1] == "4":
         plt.xlabel("Pyomo Releases/Branches")
         plt.ylabel("Runtime")
         plt.title("Performance of sum(x): %s" % (python))
-        plt.legend()
+        plt.legend(loc=2, borderaxespad=0.)
 
         #print(labels[python])
         plt.xticks(range(len(labels[python_])), xticks[python_])
@@ -287,21 +296,18 @@ elif sys.argv[1] == "10":
     for format_ in ('nl', 'lp'):
       for python in p:
         for line in p[python]:
-            if not (format_, 'total') in p[python][line][labels[python][0]]:
-                continue
+            #print(python, line, labels[python][0])
+            #print(list(p[python][line].keys()))
             x_ = [-1]*len(labels[python])
             y_ = [-1]*len(labels[python])
 
             for i in range(len(labels[python])):
                 if labels[python][i] in p[python][line]:
+                    val = p[python][line][labels[python][i]].get((format_, 'total'), None)
+                    if val is None:
+                        continue
                     x_[i] = i
-                    try:
-                        y_[i] = p[python][line][labels[python][i]][format_, 'total']
-                    except KeyError:
-                        print(python, line, labels[python][i])
-                        print(list(p[python][line][labels[python][i]].keys()))
-                        #sys.exit(0)
-                        raise
+                    y_[i] = val
 
             x__ = []
             y__ = []
@@ -309,6 +315,8 @@ elif sys.argv[1] == "10":
                 if x_[i] != -1:
                     x__.append(x_[i])
                     y__.append(y_[i])
+            if len(x__) == 0:
+                continue
             if len(x__) == 1:
                 plt.plot(x__, y__, 'o', markersize=3, c=colors[lines.index(line)])
             else:
