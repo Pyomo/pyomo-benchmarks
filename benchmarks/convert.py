@@ -44,16 +44,16 @@ def jump_clnlbeam(format_, name, num, verbose):
     return run_pyomo(format_, "%s/jump/clnlbeam.py %s/jump/clnlbeam-%d.dat" % (exdir, exdir, num), verbose)
 
 def jump_facility(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/facility.py" % exdir, verbose)
+    return run_pyomo(format_, "%s/jump/facility%d.py" % (exdir,num), verbose)
 
 def jump_facility_quick(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/facility_quick.py" % exdir, verbose)
+    return run_pyomo(format_, "%s/jump/facility%d_quick.py" % (exdir,num), verbose)
 
 def jump_lqcp(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/lqcp.py" % exdir, verbose)
+    return run_pyomo(format_, "%s/jump/lqcp%d.py" % (exdir,num), verbose)
 
 def jump_lqcp_quick(format_, name, num, verbose):
-    return run_pyomo(format_, "%s/jump/lqcp_quick.py" % exdir, verbose)
+    return run_pyomo(format_, "%s/jump/lqcp%d_quick.py" % (exdir,num), verbose)
 
 def jump_opf(format_, name, num, verbose):
     return run_pyomo(format_, "opf_%dbus.py" % num, verbose, cwd='%s/jump/' % exdir)
@@ -92,11 +92,15 @@ problems = [
     (jump_opf_quick,        6620,       False,      True,       True),     #66200
     (jump_clnlbeam,         5000,       False,      False,      False),
     (jump_clnlbeam,         50000,      False,      True,       False),    #500000
-    (jump_lqcp,             0,          False,      True,       False),
-    (jump_lqcp_quick,       0,          False,      True,       True),
-    (jump_facility,         0,          False,      None,       False),
-    (jump_facility_quick,   0,          False,      None,       True),
-    (stochpdegas1,          0,          False,      None,       False),
+    (jump_lqcp,             500,        False,      False,      False),
+    (jump_lqcp_quick,       500,        False,      False,      True),
+    (jump_lqcp,             2000,       False,      True,       False),
+    (jump_lqcp_quick,       2000,       False,      True,       True),
+    (jump_facility,         25,         True,       False,      False),
+    (jump_facility_quick,   25,         True,       False,      True),
+    (jump_facility,         75,         True,       True,       False),
+    (jump_facility_quick,   75,         True,       True,       True),
+    (stochpdegas1,          0,          True,       None,       False),
 ]
 if os.path.exists(auxdir):
     problems.append( (dcopf1,           0, True,  None, False) )
@@ -148,7 +152,8 @@ def evaluate(logfile, seconds, verbose):
             if verbose:
                 sys.stdout.write(line)
             tokens = re.split('[ \t]+', line.strip())
-            #print(tokens)
+            if verbose:
+                print(tokens)
             if len(tokens) < 2:
                 pass
             elif tokens[1] == 'seconds' and tokens[2] == 'required':
@@ -171,6 +176,8 @@ def evaluate(logfile, seconds, verbose):
 
         if verbose:
             sys.stdout.write("*" * 50 + "\n")
+    if verbose:
+        print(seconds)
     return seconds
 
 
@@ -232,7 +239,7 @@ def run_script(format_, problem, verbose, cwd=None):
     return f
 
 
-def run(R, rfile, python, release, large, verbose=False, debug=False):
+def run(R, rfile, python, release, large, verbose=False, debug=True):
 
     global problems
     if debug:
@@ -267,6 +274,8 @@ def run(R, rfile, python, release, large, verbose=False, debug=False):
             continue
         if not (large_ is None or large == large_):
             continue
+        if not linear and platform.python_implementation() != 'CPython':
+            continue
 
         name = fn.__name__
         exp = name+"_%d" % num
@@ -290,6 +299,10 @@ def run(R, rfile, python, release, large, verbose=False, debug=False):
                     data.append(row)
 
             if len(values) > 0:
+                print(python, release, exp, format_)
+                for val in values:
+                    print(val)
+
                 totals = []
                 for key in values[0]:
                     if key == 'transformations':

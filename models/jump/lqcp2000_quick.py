@@ -2,8 +2,8 @@ from pyomo.core import *
 
 model = ConcreteModel()
 
-model.n = 1000
-model.m = 1000
+model.n = 2000
+model.m = 2000
 model.dx = 1.0/model.n
 model.T = 1.58
 model.dt = model.T/model.n
