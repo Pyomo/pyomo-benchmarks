@@ -18,7 +18,7 @@ if len(sys.argv) == 1:
     sys.exit(0)
 
 if int(sys.argv[1]) < 10:
-    input = 'benchmarks/expr10.csv'
+    input = 'benchmarks/%s.csv' % sys.argv[2]
     legend = {}
     legend['simple_1'] = 'sum()'
     legend['simple_2'] = 'summation()'
