@@ -18,7 +18,7 @@ if len(sys.argv) == 1:
     sys.exit(0)
 
 if int(sys.argv[1]) < 10:
-    input = 'benchmarks/expr10.csv'
+    input = 'benchmarks/%s.csv' % sys.argv[2]
 else:
     input = 'benchmarks/convertS.csv'
 

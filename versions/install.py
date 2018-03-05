@@ -80,6 +80,7 @@ for python_ in version:
 
         print("")
         print("DIRECTORY: "+testdir)
+        print("PYTHON:    "+python)
         print("")
         if os.path.exists(testdir):
             print("  Directory exists.  Skipping installation!")

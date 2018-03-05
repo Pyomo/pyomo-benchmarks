@@ -2,25 +2,40 @@
 
 # summarize file.csv
 
+import os.path
 import csv
 import sys
 import statistics
 
-fname = 'benchmarks/%s_results.csv' % sys.argv[1]
+def read_file(fname, data):
+    print("Loading data from %s" % fname)
+    first = True
+    with open(fname, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if first:
+                i = row.index('')
+                first = False
+            val = row[i-1]
+            ndx = tuple(row[:i-1])
+            if not ndx in data:
+                data[ndx] = []
+            data[ndx].append( float(val) )
+
 
 data = {}
-first = True
-with open(fname, 'r') as f:
-    reader = csv.reader(f)
-    for row in reader:
-        if first:
-            i = row.index('')
-            first = False
-        val = row[i-1]
-        ndx = tuple(row[:i-1])
-        if not ndx in data:
-            data[ndx] = []
-        data[ndx].append( float(val) )
+
+fname = 'benchmarks/%s_results.csv' % sys.argv[1]
+if os.path.exists(fname):
+    read_file(fname, data)
+else:
+    fname = 'benchmarks/%s_releases.csv' % sys.argv[1]
+    if os.path.exists(fname):
+        read_file(fname, data)
+    fname = 'benchmarks/%s_branches.csv' % sys.argv[1]
+    if os.path.exists(fname):
+        read_file(fname, data)
+
 
 with open('benchmarks/%s.csv' % sys.argv[1], 'w') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')

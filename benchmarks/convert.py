@@ -14,7 +14,7 @@ import datetime
 
 implementation = platform.python_implementation()
 exdir = os.path.abspath(os.getcwd()+'/../models')
-auxdir = os.path.abspath(os.getcwd()+'/../pyomo-models')
+auxdir = os.path.abspath(os.getcwd()+'/../../pyomo-nonpublic-models')
 
 #
 # Logic to execute test problems
