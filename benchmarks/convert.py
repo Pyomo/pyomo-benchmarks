@@ -102,7 +102,7 @@ problems = [
 ]
 if os.path.exists(auxdir):
     problems.append( (dcopf1,           0, True,  None, False) )
-    problems.append( (uc1,              0, True,  None, False) )
+    problems.append( (uc1,              0, True,  True, False) )
 
 
 
