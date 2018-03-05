@@ -56,6 +56,10 @@ for row in versions:
     print("")
     if using_modules:
         shstr = """#!/bin/sh
+module unload python36
+module unload python35
+module unload python27
+module unload pypy2
 module load %s
 ../versions/%s/bin/python %s.py %s %s %s
 module unload %s

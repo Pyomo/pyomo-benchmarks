@@ -12,6 +12,8 @@ import re
 import platform
 import datetime
 
+TIMEOUT=60
+
 implementation = platform.python_implementation()
 exdir = os.path.abspath(os.getcwd()+'/../models')
 auxdir = os.path.abspath(os.getcwd()+'/../../pyomo-nonpublic-models')
@@ -104,7 +106,7 @@ problems = [
 ]
 if os.path.exists(auxdir):
     problems.append( (dcopf1,           0, True,  None, False) )
-    problems.append( (uc1,              0, True,  None, False) )
+    problems.append( (uc1,              0, True,  True, False) )
 
 
 
@@ -198,10 +200,11 @@ def run_pyomo(format_, problem, verbose, cwd=None):
             os.chdir(cwd)
         if verbose:
             print("Command: %s" % cmd)
-        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
-        if res[0] != 0:
-            print("Aborting performance testing!")
-            sys.exit(1)
+        with timeout(seconds=TIMEOUT):
+            res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
+            if res[0] != 0:
+                print("Aborting performance testing!")
+                sys.exit(1)
 
         seconds = {}
         eval_ = evaluate('pyomo.out', seconds, verbose)
@@ -222,16 +225,17 @@ def run_script(format_, problem, verbose, cwd=None):
         options = ""
 
     def f():
-        cmd = sys.exec_prefix + '/bin/lpython %s pyomo.%s' % (problem, format_)
+        cmd = sys.exec_prefix + '/bin/python %s pyomo.%s' % (problem, format_)
         if verbose:
             print("Command: %s" % cmd)
         _cwd = os.getcwd()
         os.chdir(cwd)
-        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
-        os.chdir(_cwd)
-        if res[0] != 0:
-            print("Aborting performance testing!")
-            sys.exit(1)
+        with timeout(seconds=TIMEOUT):
+            res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
+            os.chdir(_cwd)
+            if res[0] != 0:
+                print("Aborting performance testing!")
+                sys.exit(1)
 
         seconds = {}
         return evaluate(cwd+'/pyomo.out', seconds, verbose)
@@ -243,7 +247,7 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
 
     global problems
     if debug:
-        problems = [(pmedian, 4, True, None, False), (diag1, 100, True, None, False)]
+        problems = [(pmedian, 4, True, None, False), (diag, 100, True, None, False)]
 
     mykeys = set()
     results = {}
