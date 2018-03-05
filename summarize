@@ -41,5 +41,5 @@ with open('benchmarks/%s.csv' % sys.argv[1], 'w') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     for ndx in sorted(data.keys()):
         values = data[ndx]
-        writer.writerow( list(ndx) + [min(values), statistics.mean(values), max(values), statistics.stdev(values)] )
+        writer.writerow( list(ndx) + [min(values), statistics.mean(values), max(values), 0 if len(values) == 1 else statistics.stdev(values)] )
 
