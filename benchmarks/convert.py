@@ -94,15 +94,15 @@ problems = [
     (jump_opf_quick,        6620,       False,      True,       True),     #66200
     (jump_clnlbeam,         5000,       False,      False,      False),
     (jump_clnlbeam,         50000,      False,      True,       False),    #500000
-    (jump_lqcp,             500,        False,      False,      False),
-    (jump_lqcp_quick,       500,        False,      False,      True),
+    (jump_lqcp,             500,        False,      True,       False),
+    (jump_lqcp_quick,       500,        False,      True,       True),
     (jump_lqcp,             2000,       False,      True,       False),
     (jump_lqcp_quick,       2000,       False,      True,       True),
-    (jump_facility,         25,         True,       False,      False),
-    (jump_facility_quick,   25,         True,       False,      True),
+    (jump_facility,         25,         True,       True,       False),
+    (jump_facility_quick,   25,         True,       True,       True),
     (jump_facility,         75,         True,       True,       False),
     (jump_facility_quick,   75,         True,       True,       True),
-    (stochpdegas1,          0,          True,       None,       False),
+    (stochpdegas1,          0,          False,      None,       False),
 ]
 if os.path.exists(auxdir):
     problems.append( (dcopf1,           0, True,  None, False) )
@@ -154,8 +154,6 @@ def evaluate(logfile, seconds, verbose):
             if verbose:
                 sys.stdout.write(line)
             tokens = re.split('[ \t]+', line.strip())
-            if verbose:
-                print(tokens)
             if len(tokens) < 2:
                 pass
             elif tokens[1] == 'seconds' and tokens[2] == 'required':
@@ -178,8 +176,6 @@ def evaluate(logfile, seconds, verbose):
 
         if verbose:
             sys.stdout.write("*" * 50 + "\n")
-    if verbose:
-        print(seconds)
     return seconds
 
 
@@ -200,11 +196,16 @@ def run_pyomo(format_, problem, verbose, cwd=None):
             os.chdir(cwd)
         if verbose:
             print("Command: %s" % cmd)
-        with timeout(seconds=TIMEOUT):
-            res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
-            if res[0] != 0:
-                print("Aborting performance testing!")
-                sys.exit(1)
+        try:
+            with timeout(seconds=TIMEOUT):
+                res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
+                if res[0] != 0:
+                    print("Aborting performance testing because an error was generated!: %s" % str(res))
+                    sys.exit(1)
+        except TimeoutError:
+            print("Pyomo exceeded time limit: %d" % TIMEOUT)
+        except:
+            raise
 
         seconds = {}
         eval_ = evaluate('pyomo.out', seconds, verbose)
@@ -230,12 +231,23 @@ def run_script(format_, problem, verbose, cwd=None):
             print("Command: %s" % cmd)
         _cwd = os.getcwd()
         os.chdir(cwd)
-        with timeout(seconds=TIMEOUT):
-            res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
-            os.chdir(_cwd)
-            if res[0] != 0:
-                print("Aborting performance testing!")
-                sys.exit(1)
+        try:
+            with timeout(seconds=TIMEOUT):
+                res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
+                os.chdir(_cwd)
+                if res[0] != 0:
+                    print("Aborting performance testing because an error was generated!: %s" % str(res))
+                    print("")
+                    print("Pyomo Logfile: ")
+                    INPUT = open('pyomo.out', 'r')
+                    for line in INPUT:
+                        print(line.strip())
+                    print("")
+                    sys.exit(1)
+        except TimeoutError:
+            print("Pyomo exceeded time limit: %d" % TIMEOUT)
+        except:
+            raise
 
         seconds = {}
         return evaluate(cwd+'/pyomo.out', seconds, verbose)
@@ -244,6 +256,12 @@ def run_script(format_, problem, verbose, cwd=None):
 
 
 def run(R, rfile, python, release, large, verbose=False, debug=True):
+
+    global TIMEOUT
+    if large:
+        TIMEOUT=600
+    else:
+        TIMEOUT=60
 
     global problems
     if debug:
