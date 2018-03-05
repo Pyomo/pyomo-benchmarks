@@ -287,6 +287,7 @@ elif sys.argv[1] == "10":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
     print("Creating dog%s.pdf" % sys.argv[1])
 
+
     lines = []
     for python in p:
         for line in p[python]:
@@ -295,7 +296,11 @@ elif sys.argv[1] == "10":
 
     for format_ in ('nl', 'lp'):
       for python in p:
+        if python.endswith('cython'):
+            continue
         for line in p[python]:
+            if '_quick' in line:
+                continue
             #print(python, line, labels[python][0])
             #print(list(p[python][line].keys()))
             x_ = [-1]*len(labels[python])
@@ -318,7 +323,7 @@ elif sys.argv[1] == "10":
             if len(x__) == 0:
                 continue
             if len(x__) == 1:
-                plt.plot(x__, y__, 'o', markersize=3, c=colors[lines.index(line)])
+                plt.plot(x__, y__, 'o', label=line, markersize=3, c=colors[lines.index(line)])
             else:
                 plt.plot(x__, y__, label=line, c=colors[lines.index(line)])
     
