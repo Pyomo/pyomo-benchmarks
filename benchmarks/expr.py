@@ -475,8 +475,8 @@ if expr_dev:
         try:
             with timeout(10):
                 expr = func()
-            if repn:
-                generate_standard_repn(expr, quadratic=False)
+                if repn:
+                    generate_standard_repn(expr, quadratic=False)
         except:
             pass
 else:
@@ -484,8 +484,8 @@ else:
         try:
             with timeout(10):
                 expr = func()
-            if repn:
-                generate_ampl_repn(expr)
+                if repn:
+                    generate_ampl_repn(expr)
         except TimeoutError:
             pass
         except:
@@ -532,7 +532,12 @@ def run(N, R, rfile, python, release, skip=False):
             try:
                 num = R - len(results.get((python, release, exp), []))
                 if num > 0:
+                    sys.stdout.write("\nTiming %d trials\n" % num)
+                    sys.stdout.flush() 
                     values = timer.repeat(num, number=1)
+                    sys.stdout.write("Done\n")
+                    sys.stdout.write("\n")
+                    sys.stdout.flush() 
             except:
                 pass
             for row in results.get((python, release, exp), []):
