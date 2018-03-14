@@ -96,8 +96,8 @@ problems = [
     (jump_clnlbeam,         50000,      False,      True,       False),    #500000
     (jump_lqcp,             500,        False,      True,       False),
     (jump_lqcp_quick,       500,        False,      True,       True),
-    (jump_lqcp,             2000,       False,      True,       False),
-    (jump_lqcp_quick,       2000,       False,      True,       True),
+    #(jump_lqcp,             2000,       False,      True,       False),
+    #(jump_lqcp_quick,       2000,       False,      True,       True),
     (jump_facility,         25,         True,       True,       False),
     (jump_facility_quick,   25,         True,       True,       True),
     (jump_facility,         75,         True,       True,       False),
