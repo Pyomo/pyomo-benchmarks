@@ -97,7 +97,7 @@ for python_ in version:
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'statistics'])
         subprocess.call(['%s/bin/pip' % testdir, 'install', 'six'])
         if pyomo[0] == '-':
-            subprocess.call(['%s/bin/pip' % testdir, 'install', 'PyUtilib'])
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'git+git://github.com/PyUtilib/pyutilib.git'])
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'git+git://github.com/Pyomo/pyomo.git@%s' % pyomo[1:]])
         else:
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'PyUtilib==%s' % pyutilib])
