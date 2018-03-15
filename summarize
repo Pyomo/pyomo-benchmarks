@@ -17,29 +17,59 @@ def read_file(fname, data):
                 i = row.index('')
                 first = False
             val = row[i-1]
-            ndx = tuple(row[:i-1])
+            ndx = tuple(row[1:i-1])
+            date = row[0]
             if not ndx in data:
                 data[ndx] = []
             data[ndx].append( float(val) )
+    return date
+
+def compute_stats(fname, data, date, extend=None):
+    #
+    # Check if the file already has data with the same timestamp
+    #
+    if extend is True and os.path.exists(fname):
+        with open(fname, 'r') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if row[0] == date:
+                    print("Date '%s' already exists in %s" % (date, fname))
+                    return
+    #
+    # Compute stats
+    #
+    if extend is True:
+        print("Appending data to %s" % fname)
+        mode = 'a'
+    else:
+        print("Writing data to %s" % fname)
+        mode = 'w'
+    with open(fname, mode) as f:
+        for ndx in sorted(data.keys()):
+            values = data[ndx]
+            f.write( ",".join( map(str, [date] + list(ndx) + [min(values), statistics.mean(values), max(values), 0 if len(values) == 1 else statistics.stdev(values)]) ) )
+            f.write("\n")
 
 
+print("")
 data = {}
-
-fname = 'benchmarks/%s_results.csv' % sys.argv[1]
+fname = 'benchmarks/%s_releases.csv' % sys.argv[1]
 if os.path.exists(fname):
-    read_file(fname, data)
-else:
-    fname = 'benchmarks/%s_releases.csv' % sys.argv[1]
-    if os.path.exists(fname):
-        read_file(fname, data)
-    fname = 'benchmarks/%s_branches.csv' % sys.argv[1]
-    if os.path.exists(fname):
-        read_file(fname, data)
+    date = read_file(fname, data)
+    #print(list(data.keys()))
+    fname = 'benchmarks/%s_releases_stats.csv' % sys.argv[1]
+    compute_stats(fname, data, date, extend=False)
+
+print("")
+data = {}
+fname = 'benchmarks/%s_branches.csv' % sys.argv[1]
+if os.path.exists(fname):
+    date = read_file(fname, data)
+    #print(list(data.keys()))
+    fname = 'benchmarks/%s_branches_stats_history.csv' % sys.argv[1]
+    compute_stats(fname, data, date, extend=True)
+    fname = 'benchmarks/%s_branches_stats.csv' % sys.argv[1]
+    compute_stats(fname, data, date, extend=False)
 
 
-with open('benchmarks/%s.csv' % sys.argv[1], 'w') as csvfile:
-    writer = csv.writer(csvfile, delimiter=',')
-    for ndx in sorted(data.keys()):
-        values = data[ndx]
-        writer.writerow( list(ndx) + [min(values), statistics.mean(values), max(values), 0 if len(values) == 1 else statistics.stdev(values)] )
 

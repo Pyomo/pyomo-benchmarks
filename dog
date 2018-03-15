@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import numpy as np
 import csv
 
 colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange', 
@@ -20,7 +21,7 @@ if len(sys.argv) == 1:
 if int(sys.argv[1]) < 10:
     input = 'benchmarks/%s.csv' % sys.argv[2]
 else:
-    input = 'benchmarks/convertS.csv'
+    input = 'benchmarks/%s_branches_stats.csv' % sys.argv[2]
 
 #
 # Read input file
@@ -29,7 +30,7 @@ data = []
 with open(input, 'r') as f:
     reader = csv.reader(f)
     for row in reader:
-        data.append( row )
+        data.append( row[1:] )
 
 
 if int(sys.argv[1]) < 10:
@@ -391,3 +392,274 @@ elif sys.argv[1] == "11":
         plt.clf()
 
     pp.close()
+
+#
+# Bar graphs - comparison between master and other branches
+#
+elif sys.argv[1] == "12":
+    pp = PdfPages('dog%s.pdf' % sys.argv[1])
+    print("Creating dog%s.pdf" % sys.argv[1])
+
+
+    lines = []
+    for python in p:
+        for line in p[python]:
+            if not line in lines:
+                lines.append(line)
+
+    ticks = set()
+    for python in p:
+      for line in p[python]:
+        if '_quick' in line:
+            continue
+        ticks.add(line)
+    ticks = list(ticks)
+    ticks.sort()
+    #print(ticks)
+
+    for format_ in ('nl', 'lp'):
+      for python in p:
+        if python.endswith('cython'):
+            continue
+
+        ind = np.arange(len(ticks))
+        fig, ax = plt.subplots()
+        tmp = {}
+        for label in labels[python]:
+            tmp[label] = [-1] * len(ticks)
+        width = 0.8/len(tmp.keys())
+
+        for line in p[python]:
+            if '_quick' in line:
+                continue
+
+            for i in range(len(labels[python])):
+                if labels[python][i] in p[python][line]:
+                    val = p[python][line][labels[python][i]].get((format_, 'total'), None)
+                    if val is None:
+                        continue
+                    tmp[labels[python][i]][ticks.index(line)] = val
+
+        #print(tmp)
+        for key in tmp:
+            i = labels[python].index(key)
+            ax.bar(ind - 0.4 + width/2 + width*i, tmp[key], width, label=key, color=colors[i])
+
+        ax.set_xlabel("Pyomo Test Problems")
+        ax.set_ylabel("Runtime")
+        ax.set_title("Time to Create a %s File: %s" % (format_, python))
+        ax.legend()
+        ax.set_xticks(ind)
+        ax.set_xticklabels(ticks, rotation='vertical')
+
+        plt.subplots_adjust(bottom=0.5)
+        pp.savefig()
+        plt.clf()
+
+    pp.close()
+
+#
+# Bar graphs - relative comparison between master and other branches
+#
+elif sys.argv[1] == "13":
+    pp = PdfPages('dog%s.pdf' % sys.argv[1])
+    print("Creating dog%s.pdf" % sys.argv[1])
+
+
+    lines = []
+    for python in p:
+        for line in p[python]:
+            if not line in lines:
+                lines.append(line)
+
+    ticks = set()
+    for python in p:
+      for line in p[python]:
+        if '_quick' in line:
+            continue
+        ticks.add(line)
+    ticks = list(ticks)
+    ticks.sort()
+    #print(ticks)
+
+    for format_ in ('nl', 'lp'):
+      for python in p:
+        if python.endswith('cython'):
+            continue
+
+        ind = np.arange(len(ticks))
+        fig, ax = plt.subplots()
+        tmp = {}
+        for label in labels[python]:
+            tmp[label] = [-1] * len(ticks)
+        width = 0.8/len(tmp.keys())
+        #
+        # Collect Data
+        #
+        for line in p[python]:
+            if '_quick' in line:
+                continue
+
+            for i in range(len(labels[python])):
+                if labels[python][i] in p[python][line]:
+                    val = p[python][line][labels[python][i]].get((format_, 'total'), None)
+                    if val is None:
+                        continue
+                    tmp[labels[python][i]][ticks.index(line)] = val
+        print(tmp)
+        #
+        # Normalize data
+        #
+        for i in range(len(tmp['master'])):
+            val = None
+            if tmp['master'][i] < 0:
+                for key in tmp:
+                    if tmp[key][i] > -1 and (val is None or tmp[key][i] < val):
+                        val = tmp[key][i]
+            else:
+                val = tmp['master'][i]
+            if val is None:
+                continue
+            val += 1e-7
+            for key in tmp:
+                if tmp[key][i] > -1:
+                    tmp[key][i] = (tmp[key][i]+1e-7)/val
+        print(tmp)
+        #
+        # Create barchart
+        #
+        for key in tmp:
+            i = labels[python].index(key)
+            ax.bar(ind - 0.4 + width/2 + width*i, tmp[key], width, label=key, color=colors[i])
+
+        ax.set_xlabel("Pyomo Test Problems")
+        ax.set_ylabel("Normalized Runtime")
+        ax.set_title("Normalized Time to Create a %s File: %s" % (format_, python))
+        ax.legend()
+        ax.set_xticks(ind)
+        ax.set_xticklabels(ticks, rotation='vertical')
+
+        plt.subplots_adjust(bottom=0.5)
+        pp.savefig()
+        plt.clf()
+
+    pp.close()
+
+#
+# Bar graphs - relative comparison between master and other expr_dev variants
+#
+elif sys.argv[1] == "14":
+    pp = PdfPages('dog%s.pdf' % sys.argv[1])
+    print("Creating dog%s.pdf" % sys.argv[1])
+
+
+    lines = []
+    for python in p:
+        for line in p[python]:
+            if not line in lines:
+                lines.append(line)
+
+    ticks = set()
+    for python in p:
+      for line in p[python]:
+        if '_quick' in line:
+            continue
+        ticks.add(line)
+    ticks = list(ticks)
+    ticks.sort()
+    #print(ticks)
+
+    labels_ = ['master', 'default', 'cython', 'quick', 'quick+cython']
+    for format_ in ('nl', 'lp'):
+      for python in p:
+        if python.endswith('cython'):
+            continue
+
+        ind = np.arange(len(ticks))
+        fig, ax = plt.subplots()
+        tmp = {}
+        tmp['master'] = [-1] * len(ticks)
+        tmp['default'] = [-1] * len(ticks)
+        tmp['cython'] = [-1] * len(ticks)
+        tmp['quick'] = [-1] * len(ticks)
+        tmp['quick+cython'] = [-1] * len(ticks)
+        width = 0.8/len(tmp.keys())
+        #
+        # Collect Data
+        #
+        for line in p[python]:
+            if '_quick' in line:
+                continue
+
+            if 'master' in p[python][line]:
+                val = p[python][line]['master'].get((format_, 'total'), None)
+                if val is None:
+                    continue
+                tmp['master'][ticks.index(line)] = val
+            if 'expr_dev' in p[python][line]:
+                val = p[python][line]['expr_dev'].get((format_, 'total'), None)
+                if val is None:
+                    continue
+                tmp['default'][ticks.index(line)] = val
+            if 'expr_dev' in p.get(python+"-cython",{}).get(line,{}):
+                val = p[python+"-cython"][line]['expr_dev'].get((format_, 'total'), None)
+                if val is None:
+                    continue
+                tmp['cython'][ticks.index(line)] = val
+            if '_' in line:
+                line_ = line.split('_')
+                line_.insert(-1,'quick')
+                line_ = '_'.join(line_)
+                if 'expr_dev' in p[python].get(line_,{}):
+                    val = p[python][line_]['expr_dev'].get((format_, 'total'), None)
+                    if val is None:
+                        continue
+                    tmp['quick'][ticks.index(line)] = val
+                if 'expr_dev' in p.get(python+"-cython",{}).get(line_,{}):
+                    val = p[python+"-cython"][line_]['expr_dev'].get((format_, 'total'), None)
+                    if val is None:
+                        continue
+                    tmp['quick+cython'][ticks.index(line)] = val
+        print(tmp)
+        #
+        # Normalize data
+        #
+        print()
+        print(len(tmp['master']))
+        for i in range(len(tmp['master'])):
+            val = None
+            if tmp['master'][i] < 0:
+                for key in tmp:
+                    if tmp[key][i] > -1 and (val is None or tmp[key][i] < val):
+                        val = tmp[key][i]
+            else:
+                val = tmp['master'][i]
+            if val is None:
+                continue
+            val += 1e-7
+            for key in tmp:
+                if tmp[key][i] > -1:
+                    tmp[key][i] = (tmp[key][i]+1e-7)/val
+        print(tmp)
+        #
+        # Create barchart
+        #
+        for key in tmp:
+            i = labels_.index(key)
+            ax.bar(ind - 0.4 + width/2 + width*i, tmp[key], width, label=key, color=colors[i])
+
+        ax.set_xlabel("Pyomo Test Problems")
+        ax.set_ylabel("Normalized Runtime")
+        ax.set_title("Normalized Time to Create a %s File: %s" % (format_, python))
+        ax.set_xticks(ind)
+        ax.set_xticklabels(ticks, rotation='vertical')
+        ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
+        #chartBox = ax.get_position()
+        #ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.4, chartBox.height])
+
+        plt.subplots_adjust(bottom=0.5, right=0.7)
+        pp.savefig()
+        plt.clf()
+
+    pp.close()
+

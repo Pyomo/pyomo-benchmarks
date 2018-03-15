@@ -10,17 +10,21 @@ import os.path
 
 using_modules = False
 test_releases = False
-test_branches = False
+clean = True
 _i = 1
 while sys.argv[_i].startswith('--'):
     if sys.argv[_i] == '--modules':
         using_modules = True
         modules = {'python3.5':'python35', 'python2.7':'python27', 'python3.6':'python36', 'pypy':'pypy2',
                    'python3.5-cython':'python35', 'python2.7-cython':'python27', 'python3.6-cython':'python36'}
+    elif sys.argv[_i] == '--keep':
+        clean = False
     elif sys.argv[_i] == '--releases':
         test_releases = True
     elif sys.argv[_i] == '--branches':
-        test_branches = True
+        # This option is redundant, since the default behavior is now to 
+        # test branches
+        test_releases = False
     _i += 1
 expname = sys.argv[_i]
 
@@ -28,10 +32,11 @@ versions = []
 
 if test_releases:
     configfile = 'versions/releases.csv'
-elif test_branches:
-    configfile = 'versions/branches.csv'
 else:
-    configfile = 'versions/install.csv'
+    configfile = 'versions/branches.csv'
+#elif test_branches:
+#else:
+#    configfile = 'versions/install.csv'
 with open(configfile, 'r') as f:
     reader = csv.reader(f)
     for row in reader:
@@ -42,31 +47,52 @@ with open(configfile, 'r') as f:
 os.chdir('benchmarks')
 
 print("Running experiment: %s" % expname)
+if test_releases:
+    ofile = "%s_releases.csv" % expname
+else:
+    ofile = "%s_branches.csv" % expname
+if clean and os.path.exists(ofile):
+    os.remove(ofile)
 
-for row in versions:
-    dirname, pyver, release = row
-    if test_releases:
-        ofile = "%s_releases.csv" % expname
-    elif test_branches:
-        ofile = "%s_branches.csv" % expname
-    else:
-        ofile = "%s_results.csv" % expname
-    print("")
-    print("Version: %s" % dirname)
-    print("")
-    if using_modules:
-        shstr = """#!/bin/sh
-module unload python36
-module unload python35
-module unload python27
-module unload pypy2
-module load %s
-../versions/%s/bin/python %s.py %s %s %s
-module unload %s
-"""
-        with open('run.sh', 'w') as file:
-            file.write(shstr % (modules[pyver], dirname, expname, ofile, pyver, release, modules[pyver]))
-        subprocess.call(['/bin/sh', 'run.sh'])
-    else:
-        subprocess.call([os.path.abspath('../versions/%s/bin/python' % dirname), expname+'.py', ofile, pyver, release])
+try:
+    for row in versions:
+        dirname, pyver, release = row
+        print("")
+        print("Version: %s" % dirname)
+        print("")
+        if using_modules:
+            shstr = """#!/bin/sh
+    module unload python36
+    module unload python35
+    module unload python27
+    module unload pypy2
+    module load %s
+    ../versions/%s/bin/python %s.py %s %s %s
+    module unload %s
+    """
+            with open('run.sh', 'w') as file:
+                file.write(shstr % (modules[pyver], dirname, expname, ofile, pyver, release, modules[pyver]))
+            rc = subprocess.call(['/bin/sh', 'run.sh'])
+        else:
+            rc = subprocess.call([os.path.abspath('../versions/%s/bin/python' % dirname), expname+'.py', ofile, pyver, release])
+        if rc != 0:
+            raise RuntimeError("Unexpected failure")
+except:
+    print("Terminating with failure.")
+    sys.exit(1)
+
+#
+# Append the history file
+#
+if not test_releases:
+    hfile = "%s_branches_history.csv" % expname
+    with open(hfile, "a") as fw, open(ofile,"r") as fr: 
+        reader = csv.reader(fr)
+        data = []
+        for row in reader:
+            data.append( row )
+        data.insert(0, ["RUN"]*len(data[0]))
+        for row in data:
+            fw.write(",".join(row))
+            fw.write("\n")
 
