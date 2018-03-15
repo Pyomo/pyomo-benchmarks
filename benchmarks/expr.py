@@ -9,6 +9,8 @@ import sys
 import csv
 import statistics
 
+TODAY = str(datetime.datetime.utcnow())
+
 try:
     import pyomo.core.expr.current as EXPR
     from pyomo.repn import generate_standard_repn
@@ -543,7 +545,7 @@ def run(N, R, rfile, python, release, skip=False):
             for row in results.get((python, release, exp), []):
                 data.append(row)
             for value in values:
-                data.append( [python, release, exp, value, None, str(datetime.date.today()), platform.node()] )
+                data.append( [TODAY, python, release, exp, value, None, platform.node()] )
             sys.stdout.write(".")
             sys.stdout.flush()
         sys.stdout.write("\n")

@@ -12,6 +12,7 @@ import re
 import platform
 import datetime
 
+TODAY = str(datetime.datetime.utcnow())
 TIMEOUT=60
 
 implementation = platform.python_implementation()
@@ -90,18 +91,18 @@ problems = [
     (diag_quick,            100000,     True,       True,       True),
     (jump_opf,              662,        False,      False,      False),
     (jump_opf_quick,        662,        False,      False,      True),
-    (jump_opf,              6620,       False,      True,       False),    #66200
+    (jump_opf,              6620,       False,      True,       False),    #66200   VERY LARGE
     (jump_opf_quick,        6620,       False,      True,       True),     #66200
     (jump_clnlbeam,         5000,       False,      False,      False),
     (jump_clnlbeam,         50000,      False,      True,       False),    #500000
     (jump_lqcp,             500,        False,      True,       False),
     (jump_lqcp_quick,       500,        False,      True,       True),
-    #(jump_lqcp,             2000,       False,      True,       False),
+    #(jump_lqcp,             2000,       False,      True,       False),    VERY LARGE
     #(jump_lqcp_quick,       2000,       False,      True,       True),
     (jump_facility,         25,         True,       True,       False),
     (jump_facility_quick,   25,         True,       True,       True),
-    (jump_facility,         75,         True,       True,       False),
-    (jump_facility_quick,   75,         True,       True,       True),
+    #(jump_facility,         75,         True,       True,       False),    VERY LARGE
+    #(jump_facility_quick,   75,         True,       True,       True),
     (stochpdegas1,          0,          False,      None,       False),
 ]
 if os.path.exists(auxdir):
@@ -296,8 +297,8 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
             continue
         if not (large_ is None or large == large_):
             continue
-        if not linear and platform.python_implementation() != 'CPython':
-            continue
+        #if not linear and platform.python_implementation() != 'CPython':
+        #    continue
 
         name = fn.__name__
         exp = name+"_%d" % num
@@ -336,9 +337,9 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
                         for i in range(len(totals)):
                             totals[i] += vals[i]
                     for val in vals:
-                        data.append( [python, release, exp, format_, key, val, None, str(datetime.date.today()), platform.node()] )
+                        data.append( [TODAY, python, release, exp, format_, key, val, None, platform.node()] )
                 for val in totals:
-                    data.append( [python, release, exp, format_, 'total', val, None, str(datetime.date.today()), platform.node()] )
+                    data.append( [TODAY, python, release, exp, format_, 'total', val, None, platform.node()] )
 
         sys.stdout.write("\n")
 
