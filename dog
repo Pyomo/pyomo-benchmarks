@@ -20,17 +20,26 @@ if len(sys.argv) == 1:
 
 if int(sys.argv[1]) < 10:
     input = 'benchmarks/%s.csv' % sys.argv[2]
-else:
+elif int(sys.argv[1]) < 20:
     input = 'benchmarks/%s_branches_stats.csv' % sys.argv[2]
+else:
+    input = 'benchmarks/%s_branches_stats_history.csv' % sys.argv[2]
 
 #
 # Read input file
 #
-data = []
-with open(input, 'r') as f:
-    reader = csv.reader(f)
-    for row in reader:
-        data.append( row[1:] )
+if int(sys.argv[1]) < 20:
+    data = []
+    with open(input, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            data.append( row[1:] )
+else:
+    data = []
+    with open(input, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            data.append( row )
 
 
 if int(sys.argv[1]) < 10:
@@ -71,7 +80,7 @@ if int(sys.argv[1]) < 10:
             p[row[0]][row[2]] = {}
         p[row[0]][row[2]][row[1]] = float(row[4])
 
-else:
+elif int(sys.argv[1]) < 20:
     #
     # Process data
     #
@@ -104,14 +113,50 @@ else:
             p[row[0]][row[2]][row[1]] = {}
         p[row[0]][row[2]][row[1]][row[3], row[4]] = float(row[6])
 
-for python in labels:
-    xticks[python] = []
-    for version in labels[python]:
-        if '.' in version:
-            tmp = version.split('.')
-            xticks[python].append( '.'.join(tmp[:2]) )
-        else:
-            xticks[python].append(version)
+elif int(sys.argv[1]) < 30:
+    #
+    # Process data
+    #
+    dates = []
+    #python = set()
+    #p = {}
+    #labels = {}
+    #xticks = {}
+
+    info = {}
+
+    for row in data:
+        date, python, branch, problem, fileformat, part, minval, meanval, maxval, stdval = row
+
+        if meanval == "":
+            continue
+        if part != 'total':
+            continue
+        if python.endswith('-cython'):
+            python = python[:-7]
+            branch = branch + '-cython'
+
+        if len(dates) == 0 or dates[-1] != date:
+            dates.append( date )
+            
+        ndx = (python, fileformat)
+        if not ndx in info:
+            info[ndx] = {}
+        if not problem in info[ndx]:
+            info[ndx][problem] = {}
+        if not branch in info[ndx][problem]:
+            info[ndx][problem][branch] = {}
+        info[ndx][problem][branch][date] = float(meanval)
+    
+elif int(sys.argv[1]) < 20:
+    for python in labels:
+        xticks[python] = []
+        for version in labels[python]:
+            if '.' in version:
+                tmp = version.split('.')
+                xticks[python].append( '.'.join(tmp[:2]) )
+            else:
+                xticks[python].append(version)
 
 
 if sys.argv[1] == "1" or sys.argv[1] == "2":
@@ -620,12 +665,12 @@ elif sys.argv[1] == "14":
                     if val is None:
                         continue
                     tmp['quick+cython'][ticks.index(line)] = val
-        print(tmp)
+        ##print(tmp)
         #
         # Normalize data
         #
-        print()
-        print(len(tmp['master']))
+        ##print()
+        ##print(len(tmp['master']))
         for i in range(len(tmp['master'])):
             val = None
             if tmp['master'][i] < 0:
@@ -662,4 +707,52 @@ elif sys.argv[1] == "14":
         plt.clf()
 
     pp.close()
+
+#
+# Line graphs 
+#
+elif sys.argv[1] == "20":
+    print("Creating dog%s*.pdf" % sys.argv[1])
+    #
+
+    for python, fileformat in sorted(info.keys()):
+
+        pp = PdfPages('dog%s_%s_%s.pdf' % (sys.argv[1], python, fileformat))
+
+        #ndx = (python, fileformat)
+        #if not ndx in info:
+        #    info[ndx] = {}
+        #if not problem in info[ndx]:
+        #    info[ndx][problem] = {}
+        #if not branch in info[ndx][problem]:
+        #    info[ndx][problem][branch] = {}
+        #info[ndx][problem][branch][date] = float(meanval)
+
+        for problem in sorted(info[python, fileformat].keys()):
+            line = 0
+            print(python, fileformat, problem)
+            fig, ax = plt.subplots()
+            for branch in sorted(info[python, fileformat][problem].keys()):
+
+                i = 0
+                y_ = []
+                x_ = []
+                for date in dates:
+                    x_.append(i)
+                    y_.append( info[python, fileformat][problem][branch].get(date, None) )
+                    i += 1
+
+                ax.plot(x_, y_, 'o-', markersize=2, label=branch, c=colors[line])
+                line += 1
+
+            ax.set_ylabel(problem)
+            #ax.set_xlabel("Test Date")
+            #ax.set_title("Runtime Time to Create File %s.%s (%s)" % (problem, fileformat, python))
+            ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
+
+            plt.subplots_adjust(right=0.7)
+            pp.savefig()
+            plt.clf()
+
+        pp.close()
 
