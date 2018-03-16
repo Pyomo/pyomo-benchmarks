@@ -3,7 +3,7 @@
 # Update installations of Pyomo versions
 #
 cd versions
-./update.sh
+#./update.sh
 cd ..
 #
 # Test conversions
