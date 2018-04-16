@@ -2,6 +2,7 @@
 # Install different versions of Pyomo on different versions
 # of Python.
 #
+import sys
 import subprocess
 import os
 import shutil
@@ -88,7 +89,7 @@ for python_ in version:
             continue
 
         if using_modules:
-            subprocess.call([python, '/home/jenkins/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
+            subprocess.call([sys.executable, '/home/jenkins/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
         else:
             subprocess.call(['virtualenv', '-p', python, testdir])
         if python_.endswith('cython'):
