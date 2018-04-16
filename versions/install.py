@@ -88,7 +88,7 @@ for python_ in version:
             print("  Directory exists.  Skipping installation!")
             continue
 
-        if using_modules:
+        if False and using_modules:
             subprocess.call([sys.executable, '/home/jenkins/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
         else:
             subprocess.call(['virtualenv', '-p', python, testdir])
