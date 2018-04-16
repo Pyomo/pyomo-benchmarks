@@ -11,17 +11,17 @@ module unload python27
 module unload pypy2
 
 module load pypy2
-make install
+/usr/bin/python install.py
 
 module unload pypy2
 module load python36
-make install
+/usr/bin/python install.py
 
 module unload python36
 module load python35
-make install
+/usr/bin/python install.py
 
 module unload python35
 module load python27
-make install
+/usr/bin/python install.py
 
