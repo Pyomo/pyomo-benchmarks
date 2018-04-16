@@ -277,9 +277,9 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
             reader = csv.reader(f)
             i = 0
             for row in reader:
-                if row[0] == python and row[1] == release:
-                    mykeys.add(row[4])
-                    ndx = tuple(row[:5])
+                if row[1] == python and row[2] == release:
+                    mykeys.add(row[5])
+                    ndx = tuple(row[1:6])
                     if not ndx in results:
                         results[ndx] = []
                     results[ndx].append(row)
@@ -310,8 +310,11 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
         for format_ in formats:
             f = partial(fn, format_, name, num, verbose)()
             values = []
+            print(python, release, exp, format_)
             try:
                 R_ = R - len(results.get((python, release, exp, format_, 'total'), []))
+                print("R:      "+str(R))
+                print("# done: "+str(R-R_))
                 if R_ > 0:
                     values = values = measure(f, n=R_)
             except:
@@ -322,24 +325,25 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
                     data.append(row)
 
             if len(values) > 0:
-                print(python, release, exp, format_)
                 for val in values:
                     print(val)
 
                 totals = []
-                for key in values[0]:
-                    if key == 'transformations':
-                        continue
-                    vals = [trial[key] for trial in values]
+                for key in ['construct','write_problem']:
+                    vals = [trial.get(key,None) for trial in values]
                     if len(totals) == 0:
                         totals = vals
                     else:
                         for i in range(len(totals)):
-                            totals[i] += vals[i]
+                            if vals[i] is None:
+                                totals[i] = None
+                            if not totals[i] is None:
+                                totals[i] += vals[i]
                     for val in vals:
                         data.append( [TODAY, python, release, exp, format_, key, val, None, platform.node()] )
                 for val in totals:
-                    data.append( [TODAY, python, release, exp, format_, 'total', val, None, platform.node()] )
+                    if not val is None:
+                        data.append( [TODAY, python, release, exp, format_, 'total', val, None, platform.node()] )
 
         sys.stdout.write("\n")
 
