@@ -7,6 +7,7 @@ import sys
 import csv
 import os
 import os.path
+import os.environ
 
 using_modules = False
 test_releases = False
@@ -30,13 +31,11 @@ expname = sys.argv[_i]
 
 versions = []
 
+pythondir = os.environ.get('VERSIONS_DIR', 'versions')
 if test_releases:
-    configfile = 'versions/releases.csv'
+    configfile = os.join(pythondir, 'releases.csv')
 else:
-    configfile = 'versions/branches.csv'
-#elif test_branches:
-#else:
-#    configfile = 'versions/install.csv'
+    configfile = os.join(pythondir, 'branches.csv')
 with open(configfile, 'r') as f:
     reader = csv.reader(f)
     for row in reader:
