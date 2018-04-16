@@ -92,6 +92,8 @@ for python_ in version:
             subprocess.call([sys.executable, '/home/jenkins/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
         else:
             subprocess.call(['virtualenv', '-p', python, testdir])
+        subprocess.call(['%s/bin/easy_install' % testdir, 'pip'])
+
         if python_.endswith('cython'):
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'cython'])
         if python == 'pypy' or python == 'python2.7':
