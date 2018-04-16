@@ -30,7 +30,7 @@ expname = sys.argv[_i]
 
 versions = []
 
-pythondir = os.environ.get('VERSIONS_DIR', 'versions')
+pythondir = os.path.abspath(os.environ.get('VERSIONS_DIR', 'versions'))
 if test_releases:
     configfile = os.path.join(pythondir, 'releases.csv')
 else:
@@ -65,14 +65,14 @@ try:
     module unload python27
     module unload pypy2
     module load %s
-    ../versions/%s/bin/python %s.py %s %s %s
+    %s/%s/bin/python %s.py %s %s %s
     module unload %s
     """
             with open('run.sh', 'w') as file:
-                file.write(shstr % (modules[pyver], dirname, expname, ofile, pyver, release, modules[pyver]))
+                file.write(shstr % (modules[pyver], pythondir, dirname, expname, ofile, pyver, release, modules[pyver]))
             rc = subprocess.call(['/bin/sh', 'run.sh'])
         else:
-            rc = subprocess.call([os.path.abspath('../versions/%s/bin/python' % dirname), expname+'.py', ofile, pyver, release])
+            rc = subprocess.call([os.path.abspath('%s/%s/bin/python' % (pythondir, dirname)), expname+'.py', ofile, pyver, release])
         if rc != 0:
             raise RuntimeError("Unexpected failure")
 except:
