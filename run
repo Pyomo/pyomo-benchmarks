@@ -32,9 +32,9 @@ versions = []
 
 pythondir = os.environ.get('VERSIONS_DIR', 'versions')
 if test_releases:
-    configfile = os.join(pythondir, 'releases.csv')
+    configfile = os.path.join(pythondir, 'releases.csv')
 else:
-    configfile = os.join(pythondir, 'branches.csv')
+    configfile = os.path.join(pythondir, 'branches.csv')
 with open(configfile, 'r') as f:
     reader = csv.reader(f)
     for row in reader:
