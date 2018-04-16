@@ -21,7 +21,8 @@ def read_file(fname, data):
             date = row[0]
             if not ndx in data:
                 data[ndx] = []
-            data[ndx].append( float(val) )
+            if val != "":
+                data[ndx].append( float(val) )
     return date
 
 def compute_stats(fname, data, date, extend=None):
@@ -47,8 +48,9 @@ def compute_stats(fname, data, date, extend=None):
     with open(fname, mode) as f:
         for ndx in sorted(data.keys()):
             values = data[ndx]
-            f.write( ",".join( map(str, [date] + list(ndx) + [min(values), statistics.mean(values), max(values), 0 if len(values) == 1 else statistics.stdev(values)]) ) )
-            f.write("\n")
+            if len(values) > 0:
+                f.write( ",".join( map(str, [date] + list(ndx) + [min(values), statistics.mean(values), max(values), 0 if len(values) == 1 else statistics.stdev(values)]) ) )
+                f.write("\n")
 
 
 print("")
