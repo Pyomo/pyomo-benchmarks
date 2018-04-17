@@ -28,11 +28,7 @@ pyutilib_version = {
 
 version = ['pypy',
 'python3.6', 
-'python3.6-cython',
-'python3.5', 
-'python3.5-cython',
-'python2.7', 
-'python2.7-cython'
+'python3.6-cython'
 ]
 
 config = {
@@ -50,6 +46,15 @@ config = {
 }
 }
 """
+version = ['pypy',
+'python3.6', 
+'python3.6-cython',
+'python3.5', 
+'python3.5-cython',
+'python2.7', 
+'python2.7-cython'
+]
+
 config = {
 'python3.6':
 {
