@@ -30,6 +30,8 @@ version = ['pypy',
 'python3.6', 
 'python3.6-cython'
 ]
+if len(sys.argv) > 1:
+    version = [val for val in version if val in sys.argv[1:]]
 
 config = {
 'python3.6':
