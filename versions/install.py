@@ -10,6 +10,22 @@ import csv
 
 using_modules = True
 
+#                   PYOMO           PYUTILIB
+pyutilib_version = {
+                    '4.1.10527':    '5.1.3556',
+                    '4.2.10784':    '5.2.3601',
+                    '4.3.11388':    '5.3.5',
+                    '4.4.1':        '5.4',
+                    '5.0':          '5.4',
+                    '5.1.1':        '5.4.1',
+                    '5.2':          '5.5',
+                    '5.3':          '5.6',
+                    '5.4.3':        '5.6.2',
+                    '5.5':          '5.6.3',
+                    '-master':      '5.6.3',
+                    '-expr_dev':    '5.6.3'
+                    }
+
 version = ['pypy',
 'python3.6', 
 'python3.6-cython',
@@ -22,43 +38,35 @@ version = ['pypy',
 config = {
 'python3.6':
 {
-'pyomo_version':    ['5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
+'pyomo_version':    ['5.2', '5.3', '5.4.3', '5.5', '-master', '-expr_dev'],
 },
 'python3.6-cython':
 {
 'pyomo_version':    ['-expr_dev'],
-'pyutilib_version': ['5.6.2']
 },
 'python3.5':
 {
-'pyomo_version':    ['5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
+'pyomo_version':    ['5.1.1', '5.2', '5.3', '5.4.3', '5.5', '-master', '-expr_dev'],
 },
 'python3.5-cython':
 {
 'pyomo_version':    ['-expr_dev'],
-'pyutilib_version': ['5.6']
 },
 'python2.7':
 {
-'pyomo_version':    ['4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.1.3556',  '5.2.3601',  '5.3.5',     '5.4',   '5.4', '5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
+'pyomo_version':    ['4.1.10527', '4.2.10784', '4.3.11388', '4.4.1', '5.0', '5.1.1', '5.2', '5.3', '5.4.3', '5.5', '-master', '-expr_dev'],
 },
 'python2.7-cython':
 {
 'pyomo_version':    ['-expr_dev'],
-'pyutilib_version': ['5.6.2']
 },
 'pypy':
 {
-'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '5.4.3', '-master', '-expr_dev'],
-'pyutilib_version': ['5.4', '5.4.1', '5.5', '5.6', '5.6.2', '5.6.2',   '5.6.2']
+'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '5.4.3', '5.5', '-master', '-expr_dev'],
 }
 }
 
 
-#[['directory', 'python', 'pyomo']]
 csvinfo = [] 
 releaseinfo = []
 branchinfo = []
@@ -70,7 +78,7 @@ for python_ in version:
         python = python_
     for i in range(len(config[python_]['pyomo_version'])):
         pyomo = config[python_]['pyomo_version'][i]
-        pyutilib = config[python_]['pyutilib_version'][i]
+        pyutilib = pyutilib_version[ pyomo ]
         if pyomo[0] == '-':
             testdir = "%s-%s" % (python_,pyomo[1:])
             csvinfo.append([testdir, python_, pyomo[1:]])
