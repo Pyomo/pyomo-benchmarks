@@ -38,6 +38,21 @@ version = ['pypy',
 config = {
 'python3.6':
 {
+'pyomo_version':    ['5.5', '-master', '-expr_dev'],
+},
+'python3.6-cython':
+{
+'pyomo_version':    ['-expr_dev'],
+},
+'pypy':
+{
+'pyomo_version':    ['5.5', '-master', '-expr_dev'],
+}
+}
+"""
+config = {
+'python3.6':
+{
 'pyomo_version':    ['5.2', '5.3', '5.4.3', '5.5', '-master', '-expr_dev'],
 },
 'python3.6-cython':
@@ -65,6 +80,7 @@ config = {
 'pyomo_version':    ['5.0', '5.1.1', '5.2', '5.3', '5.4.3', '5.5', '-master', '-expr_dev'],
 }
 }
+"""
 
 
 csvinfo = [] 
