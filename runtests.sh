@@ -1,10 +1,6 @@
 #!/bin/sh -v
 #
-# Update installations of Pyomo versions
-#
-cd versions
-#./update.sh
-cd ..
+
 #
 # Test conversions
 #
