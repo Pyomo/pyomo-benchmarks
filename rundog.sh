@@ -1,7 +1,7 @@
 #!/bin/sh
 
-#echo "SKIPPING RUNDOG"
-#exit 0
+echo "SKIPPING RUNDOG"
+exit 0
 
 ./dog 14 convertL
 ./dog 13 convertL
