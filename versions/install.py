@@ -29,8 +29,8 @@ pyutilib_version = {
 all_versions = ['pypy',
 'python3.6', 
 'python3.6-cython',
-'python3.5', 
-'python3.5-cython',
+#'python3.5', 
+#'python3.5-cython',
 'python2.7', 
 'python2.7-cython'
 ]
