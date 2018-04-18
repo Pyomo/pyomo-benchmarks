@@ -452,6 +452,17 @@ elif sys.argv[1] == "12":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
     print("Creating dog%s.pdf" % sys.argv[1])
 
+    fig, ax = plt.subplots()
+    ax.text(0,0.75,"Figures that compare runtime to generate problem files")
+    ax.text(0,0.65,"    Master vs Branches")
+    ax.text(0,0.5,"Figures: (python version) * (file type)")
+    ax.text(0,0.25,"* Negative values represent missing data")
+    ax.axes.get_xaxis().set_visible(False)
+    ax.axes.get_yaxis().set_visible(False)
+    ax.axis('off')
+    pp.savefig()
+    plt.clf()
+
 
     lines = []
     for python in p:
@@ -478,7 +489,7 @@ elif sys.argv[1] == "12":
         fig, ax = plt.subplots()
         tmp = {}
         for label in labels[python]:
-            tmp[label] = [-1] * len(ticks)
+            tmp[label] = [-0.1] * len(ticks)
         width = 0.8/len(tmp.keys())
 
         for line in p[python]:
@@ -517,6 +528,17 @@ elif sys.argv[1] == "13":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
     print("Creating dog%s.pdf" % sys.argv[1])
 
+    fig, ax = plt.subplots()
+    ax.text(0,0.75,"Figures that compare normalized runtime to generate problem files")
+    ax.text(0,0.65,"    Master vs Branches")
+    ax.text(0,0.5,"Figures: (python version) * (file type)")
+    ax.text(0,0.25,"* Negative values represent missing data")
+    ax.axes.get_xaxis().set_visible(False)
+    ax.axes.get_yaxis().set_visible(False)
+    ax.axis('off')
+    pp.savefig()
+    plt.clf()
+
 
     lines = []
     for python in p:
@@ -543,7 +565,7 @@ elif sys.argv[1] == "13":
         fig, ax = plt.subplots()
         tmp = {}
         for label in labels[python]:
-            tmp[label] = [-1] * len(ticks)
+            tmp[label] = [-0.1] * len(ticks)
         width = 0.8/len(tmp.keys())
         #
         # Collect Data
@@ -558,7 +580,7 @@ elif sys.argv[1] == "13":
                     if val is None:
                         continue
                     tmp[labels[python][i]][ticks.index(line)] = val
-        print(tmp)
+        #print(tmp)
         #
         # Normalize data
         #
@@ -566,7 +588,7 @@ elif sys.argv[1] == "13":
             val = None
             if tmp['master'][i] < 0:
                 for key in tmp:
-                    if tmp[key][i] > -1 and (val is None or tmp[key][i] < val):
+                    if tmp[key][i] > -0.1 and (val is None or tmp[key][i] < val):
                         val = tmp[key][i]
             else:
                 val = tmp['master'][i]
@@ -574,9 +596,9 @@ elif sys.argv[1] == "13":
                 continue
             val += 1e-7
             for key in tmp:
-                if tmp[key][i] > -1:
+                if tmp[key][i] > -0.1:
                     tmp[key][i] = (tmp[key][i]+1e-7)/val
-        print(tmp)
+        #print(tmp)
         #
         # Create barchart
         #
@@ -603,6 +625,17 @@ elif sys.argv[1] == "13":
 elif sys.argv[1] == "14":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
     print("Creating dog%s.pdf" % sys.argv[1])
+
+    fig, ax = plt.subplots()
+    ax.text(0,0.75,"Figures that compare normalized runtime to generate problem files")
+    ax.text(0,0.65,"    Master vs ExprDev branch vs Problems using quicksum (w/ and w/o cython)")
+    ax.text(0,0.5,"Figures: (python version) * (file type)")
+    ax.text(0,0.25,"* Negative values represent missing data")
+    ax.axes.get_xaxis().set_visible(False)
+    ax.axes.get_yaxis().set_visible(False)
+    ax.axis('off')
+    pp.savefig()
+    plt.clf()
 
 
     lines = []
@@ -687,7 +720,7 @@ elif sys.argv[1] == "14":
             for key in tmp:
                 if tmp[key][i] > -0.1:
                     tmp[key][i] = (tmp[key][i]+1e-7)/val
-        print(tmp)
+        #print(tmp)
         #
         # Create barchart
         #
@@ -711,7 +744,7 @@ elif sys.argv[1] == "14":
     pp.close()
 
 #
-# CSV file associated with Bar graphs - relative comparison between master and other expr_dev variants
+# RUNTIME DATA
 #
 elif sys.argv[1] == "15":
     print("Creating dog%s.csv" % sys.argv[1])
@@ -732,10 +765,11 @@ elif sys.argv[1] == "15":
         ticks.add(line)
     ticks = list(ticks)
     ticks.sort()
-    #print(ticks)
 
     labels_ = ['master', 'default', 'cython', 'quick', 'quick+cython']
 
+    csvdata.append( ['PERFORMANCE TO CONSTRUCT PROBLEM FILES: '+sys.argv[2]] + [None]*12 )
+    csvdata.append( [None, None, None] + ['NORMALIZED DATA', None, None, None, None] + ['RUNTIME DATA', None, None, None, None] )
     csvdata.append( ['Python', 'Format', 'Problem'] + labels_ + labels_ )
 
     for format_ in ('nl', 'lp'):
@@ -786,8 +820,6 @@ elif sys.argv[1] == "15":
         #
         # Normalize data
         #
-        ##print()
-        ##print(len(tmp['master']))
         for i in range(len(tmp['master'])):
             val = None
             if tmp['master'][i] < 0:
@@ -808,27 +840,127 @@ elif sys.argv[1] == "15":
             norm_data = [tmp[key][i] for key in labels_]
             csvdata.append( [python, format_, ticks[i]] + [None if val < 0.0 else val for val in norm_data] + [None if val < 0.0 else val for val in raw_data] )
 
+    import csv
+    with open("dog%s.csv" % sys.argv[1], 'w') as f:
+        writer = csv.writer(f)
+        for row in csvdata:
+            writer.writerow(row)
+
+
+elif sys.argv[1] == "16":
+    print("Creating dog%s.csv" % sys.argv[1])
+
+    csvdata = []
+
+    lines = []
+    for python in p:
+        for line in p[python]:
+            if not line in lines:
+                lines.append(line)
+
+    ticks = set()
+    for python in p:
+      for line in p[python]:
+        if '_quick' in line:
+            continue
+        ticks.add(line)
+    ticks = list(ticks)
+    ticks.sort()
+
+    labels_ = ['master', 'default', 'cython', 'quick', 'quick+cython']
+
+    csvdata.append( ['PERFORMANCE SUMMARY ALL DATA: '+sys.argv[2]] + [None]*12 )
+    csvdata.append( [None, None, None] + ['RUNTIME DATA', None, None, None, None] )
+    csvdata.append( ['Python', 'Format', 'Problem', labels_[0], None, None, labels_[1], None, None, labels_[2], None, None, labels_[3], None, None, labels_[4], None, None] )
+    csvdata.append( [None, None, None] + ['Construct', 'Write', 'Total']*5 )
+
+    for format_ in ('nl', 'lp'):
+      for python in p:
+        if python.endswith('cython'):
+            continue
+
+        tmp = {}
+        tmp['master'] = [-0.1] * len(ticks)*3
+        tmp['default'] = [-0.1] * len(ticks)*3
+        tmp['cython'] = [-0.1] * len(ticks)*3
+        tmp['quick'] = [-0.1] * len(ticks)*3
+        tmp['quick+cython'] = [-0.1] * len(ticks)*3
         #
-        # Create barchart
-        ##
-        #for key in tmp:
-        #    i = labels_.index(key)
-        #    ax.bar(ind - 0.4 + width/2 + width*i, tmp[key], width, label=key, color=colors[i])
+        # Collect Data
+        #
+        for line in p[python]:
+            if '_quick' in line:
+                continue
 
-        #ax.set_xlabel("Pyomo Test Problems")
-        #ax.set_ylabel("Normalized Runtime")
-        #ax.set_title("Normalized Time to Create a %s File: %s" % (format_, python))
-        #ax.set_xticks(ind)
-        #ax.set_xticklabels(ticks, rotation='vertical')
-        #ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
-        #chartBox = ax.get_position()
-        #ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.4, chartBox.height])
+            if 'master' in p[python][line]:
+                val = p[python][line]['master'].get((format_, 'construct'), None)
+                if not val is None:
+                    tmp['master'][3*ticks.index(line)] = val
+                val = p[python][line]['master'].get((format_, 'write_problem'), None)
+                if not val is None:
+                    tmp['master'][3*ticks.index(line)+1] = val
+                val = p[python][line]['master'].get((format_, 'total'), None)
+                if not val is None:
+                    tmp['master'][3*ticks.index(line)+2] = val
 
-        #plt.subplots_adjust(bottom=0.5, right=0.7)
-        #pp.savefig()
-        #plt.clf()
+            if 'expr_dev' in p[python][line]:
+                val = p[python][line]['expr_dev'].get((format_, 'construct'), None)
+                if not val is None:
+                    tmp['default'][3*ticks.index(line)] = val
+                val = p[python][line]['expr_dev'].get((format_, 'write_problem'), None)
+                if not val is None:
+                    tmp['default'][3*ticks.index(line)+1] = val
+                val = p[python][line]['expr_dev'].get((format_, 'total'), None)
+                if not val is None:
+                    tmp['default'][3*ticks.index(line)+2] = val
 
-    #pp.close()
+            if 'expr_dev' in p.get(python+"-cython",{}).get(line,{}):
+                val = p[python+"-cython"][line]['expr_dev'].get((format_, 'construct'), None)
+                if not val is None:
+                    tmp['cython'][3*ticks.index(line)] = val
+                val = p[python+"-cython"][line]['expr_dev'].get((format_, 'write_problem'), None)
+                if not val is None:
+                    tmp['cython'][3*ticks.index(line)+1] = val
+                val = p[python+"-cython"][line]['expr_dev'].get((format_, 'total'), None)
+                if not val is None:
+                    tmp['cython'][3*ticks.index(line)+2] = val
+
+            if '_' in line:
+                line_ = line.split('_')
+                line_.insert(-1,'quick')
+                line_ = '_'.join(line_)
+                if 'expr_dev' in p[python].get(line_,{}):
+                    val = p[python][line_]['expr_dev'].get((format_, 'construct'), None)
+                    if not val is None:
+                        tmp['quick'][3*ticks.index(line)] = val
+                    val = p[python][line_]['expr_dev'].get((format_, 'write_problem'), None)
+                    if not val is None:
+                        tmp['quick'][3*ticks.index(line)+1] = val
+                    val = p[python][line_]['expr_dev'].get((format_, 'total'), None)
+                    if not val is None:
+                        tmp['quick'][3*ticks.index(line)+2] = val
+
+                if 'expr_dev' in p.get(python+"-cython",{}).get(line_,{}):
+                    val = p[python+"-cython"][line_]['expr_dev'].get((format_, 'construct'), None)
+                    if not val is None:
+                        tmp['quick+cython'][3*ticks.index(line)] = val
+                    val = p[python+"-cython"][line_]['expr_dev'].get((format_, 'write_problem'), None)
+                    if not val is None:
+                        tmp['quick+cython'][3*ticks.index(line)+1] = val
+                    val = p[python+"-cython"][line_]['expr_dev'].get((format_, 'total'), None)
+                    if not val is None:
+                        tmp['quick+cython'][3*ticks.index(line)+2] = val
+
+        raw = tmp
+
+        for i in range(len(ticks)):
+            raw_data = []
+            for key in labels_:
+                raw_data.append( raw[key][3*i] )
+                raw_data.append( raw[key][3*i+1] )
+                raw_data.append( raw[key][3*i+2] )
+            csvdata.append( [python, format_, ticks[i]] + [None if val < 0.0 else val for val in raw_data] )
+
     import csv
     with open("dog%s.csv" % sys.argv[1], 'w') as f:
         writer = csv.writer(f)
