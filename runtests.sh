@@ -1,7 +1,7 @@
 #!/bin/sh -v
 
-echo "SKIPPING RUNTESTS"
-exit 0
+#echo "SKIPPING RUNTESTS"
+#exit 0
 
 
 #
@@ -10,6 +10,8 @@ exit 0
 ./run --modules --releases --keep convertS > convertS_releases.out 2>&1
 ./run --modules convertS > convertS_branches.out 2>&1
 ./summarize convertS
+
+#./run --modules --releases --keep convertL > convertL_releases.out 2>&1
 #./run --modules convertL > convertL.out 2>&1
 #./summarize convertL
 

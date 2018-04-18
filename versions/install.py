@@ -28,10 +28,16 @@ pyutilib_version = {
 
 all_versions = ['pypy',
 'python3.6', 
-'python3.6-cython'
+'python3.6-cython',
+'python3.5', 
+'python3.5-cython',
+'python2.7', 
+'python2.7-cython'
 ]
 
+
 config = {
+
 'python3.6':
 {
 'pyomo_version':    ['5.5', '-master', '-expr_dev'],
@@ -40,21 +46,23 @@ config = {
 {
 'pyomo_version':    ['-expr_dev'],
 },
+
+'python2.7':
+{
+'pyomo_version':    ['5.5', '-master', '-expr_dev'],
+},
+'python2.7-cython':
+{
+'pyomo_version':    ['-expr_dev'],
+},
+
 'pypy':
 {
 'pyomo_version':    ['5.5', '-master', '-expr_dev'],
 }
+
 }
 """
-all_versions = ['pypy',
-'python3.6', 
-'python3.6-cython',
-'python3.5', 
-'python3.5-cython',
-'python2.7', 
-'python2.7-cython'
-]
-
 config = {
 'python3.6':
 {

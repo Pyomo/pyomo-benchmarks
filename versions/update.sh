@@ -1,7 +1,7 @@
 #!/bin/bash -v
 
-echo "SKIPPING PYOMO UPDATE"
-exit 0
+#echo "SKIPPING PYOMO UPDATE"
+#exit 0
 
 set +e
 
