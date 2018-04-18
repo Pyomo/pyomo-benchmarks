@@ -1,8 +1,8 @@
 #!/bin/sh
 
-./dog 14 convertL
-./dog 13 convertL
-./dog 12 convertL
-./dog 10 convertL
-./dog 20 convertL
+./dog 14 convertS
+./dog 13 convertS
+./dog 12 convertS
+./dog 10 convertS
+./dog 20 convertS
 
