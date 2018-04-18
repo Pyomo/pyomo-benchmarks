@@ -1,7 +1,7 @@
 #!/bin/sh
 
-#echo "SKIPPING RUNDOG"
-#exit 0
+echo "SKIPPING RUNDOG"
+exit 0
 
 mkdir -p results
 
