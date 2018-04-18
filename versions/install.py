@@ -26,12 +26,10 @@ pyutilib_version = {
                     '-expr_dev':    '5.6.3'
                     }
 
-version = ['pypy',
+all_versions = ['pypy',
 'python3.6', 
 'python3.6-cython'
 ]
-if len(sys.argv) > 1:
-    version = [val for val in version if val in sys.argv[1:]]
 
 config = {
 'python3.6':
@@ -48,7 +46,7 @@ config = {
 }
 }
 """
-version = ['pypy',
+all_versions = ['pypy',
 'python3.6', 
 'python3.6-cython',
 'python3.5', 
@@ -89,8 +87,9 @@ config = {
 }
 """
 
+if len(sys.argv) > 1:
+    version = [val for val in all_versions if val in sys.argv[1:]]
 
-csvinfo = [] 
 releaseinfo = []
 branchinfo = []
 
@@ -104,11 +103,9 @@ for python_ in version:
         pyutilib = pyutilib_version[ pyomo ]
         if pyomo[0] == '-':
             testdir = "%s-%s" % (python_,pyomo[1:])
-            csvinfo.append([testdir, python_, pyomo[1:]])
             branchinfo.append([testdir, python_, pyomo[1:]])
         else:
             testdir = "%s-%s" % (python_, pyomo)
-            csvinfo.append([testdir, python_, pyomo])
             releaseinfo.append([testdir, python_, pyomo])
 
         print("")
@@ -142,6 +139,16 @@ for python_ in version:
 #
 # Save info in the install.csv file
 #
+csvinfo = [] 
+for python_ in all_versions:
+    for i,pyomo in enumerate(config[python_]['pyomo_version']):
+        if pyomo[0] == '-':
+            testdir = "%s-%s" % (python_,pyomo[1:])
+            csvinfo.append([testdir, python_, pyomo[1:]])
+        else:
+            testdir = "%s-%s" % (python_, pyomo)
+            csvinfo.append([testdir, python_, pyomo])
+
 with open('install.csv', 'w') as csvfile:
     writer = csv.writer(csvfile)
     for row in csvinfo:
