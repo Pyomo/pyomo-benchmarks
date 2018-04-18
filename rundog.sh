@@ -20,6 +20,8 @@ mv dog15.csv results/convertL_dog15.csv
 ./dog 16 convertL
 mv dog16.csv results/convertL_dog16.csv
 
-./dog 20 convertL
-mv dog20.pdf results/convertL_dog20.pdf
+./dog 21 convertL
+mv dog21_pypy.pdf results/convertL_dog21_pypy.pdf
+mv dog21_python2.7.pdf results/convertL_dog21_python2.7.pdf
+mv dog21_python3.6.pdf results/convertL_dog21_python3.6.pdf
 
