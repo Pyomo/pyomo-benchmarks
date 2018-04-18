@@ -84,13 +84,16 @@ except:
 #
 if not test_releases:
     hfile = "%s_branches_history.csv" % expname
-    with open(hfile, "a") as fw, open(ofile,"r") as fr: 
-        reader = csv.reader(fr)
-        data = []
-        for row in reader:
-            data.append( row )
-        data.insert(0, ["RUN"]*len(data[0]))
-        for row in data:
-            fw.write(",".join(row))
-            fw.write("\n")
+    if os.path.exists(ofile):
+        with open(hfile, "a") as fw, open(ofile,"r") as fr: 
+            reader = csv.reader(fr)
+            data = []
+            for row in reader:
+                data.append( row )
+            data.insert(0, ["RUN"]*len(data[0]))
+            for row in data:
+                fw.write(",".join(row))
+                fw.write("\n")
+    else:
+        print("No file found: %s" % ofile)
 
