@@ -1,5 +1,8 @@
 #!/bin/bash -v
 
+echo "SKIPPING PYOMO UPDATE"
+exit 0
+
 set +e
 
 \rm -Rf *master
