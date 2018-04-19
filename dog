@@ -1029,12 +1029,15 @@ elif sys.argv[1] == "21":
       ax.axis('off')
       pp.savefig()
       plt.clf()
+      plt_counter = 0
+
+      fig = plt.figure()
 
       print(python)
       for problem in sorted(info[python].keys()):
         if 'quick' in problem:
             continue
-        fig, ax = plt.subplots()
+        ax = fig.add_subplot(5,1,plt_counter+1)
         line = 0
         for fileformat in sorted(info[python][problem].keys()):
             print(problem, fileformat)
@@ -1063,17 +1066,34 @@ elif sys.argv[1] == "21":
                 line += 1
 
         ax.set_xlim(left=x_[0], right=x_[-1])
-        ax.set_title("Performance Tests: %s %s" % (python, problem))
-        ax.set_ylabel("Runtime")
-        ax.set_xlabel("Latest Master Tests vs Current Release")
-        plt.xticks(x_, x_[:-1] + ["v"+latest_version])
+        ylow, yhi = ax.get_ylim()
+        ax.text(x_[0]+0.05, (yhi-ylow)*0.8+ylow, problem, fontsize=9)
+        if plt_counter == 0:
+            #ax.set_title("Time to Write Model Files: %s" % (python), fontsize=9)
+            ax.set_title("Time to Write Model Files", fontsize=9)
+        #ax.set_ylabel(problem)
+        if plt_counter == 4:
+            ax.set_xlabel("Latest Master Tests vs Current Release", fontsize=9)
+            plt.xticks(x_, x_[:-1] + ["v"+latest_version])
+            ax.axes.get_xaxis().set_visible(True)
+        else:
+            ax.axes.get_xaxis().set_visible(False)
+        for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+            label.set_fontsize(9)
         #ax.set_xlabel("Test Date")
         #ax.set_title("Runtime Time to Create File %s.%s (%s)" % (problem, fileformat, python))
-        ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
+        ax.legend(loc='upper center', bbox_to_anchor=(1.1,1), borderaxespad=0.)
 
-        plt.subplots_adjust(right=0.7)
-        pp.savefig()
-        plt.clf()
+        #plt.subplots_adjust(bottom=0.1)
+        plt.subplots_adjust(right=0.8)
+        plt_counter = (plt_counter + 1) % 5
+        fig.canvas.draw()
+        plt.show()
+        if plt_counter == 0:
+            print("HERE")
+            pp.savefig()
+            plt.clf()
+            fig = plt.figure()
 
       pp.close()
 
