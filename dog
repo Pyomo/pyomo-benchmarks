@@ -156,16 +156,6 @@ elif int(sys.argv[1]) < 30:
             info[python][problem][fileformat][branch] = {}
         info[python][problem][fileformat][branch][date] = float(meanval)
     
-elif int(sys.argv[1]) < 20:
-    for python in labels:
-        xticks[python] = []
-        for version in labels[python]:
-            if '.' in version:
-                tmp = version.split('.')
-                xticks[python].append( '.'.join(tmp[:2]) )
-            else:
-                xticks[python].append(version)
-
 
 if sys.argv[1] == "1" or sys.argv[1] == "2":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
@@ -1084,6 +1074,187 @@ elif sys.argv[1] == "21":
         plt.subplots_adjust(right=0.7)
         pp.savefig()
         plt.clf()
+
+      pp.close()
+
+#
+# History Graphs for MASTER
+#
+elif sys.argv[1] == "22":
+    print("Creating dog%s*.pdf" % sys.argv[1])
+    print(dates)
+    if len(dates) > 100:
+        dates = dates[-100:]
+    #
+    def versiontuple(v):
+        return tuple(map(int, (v.split("."))))
+    _release_data = {}
+    releases = {}
+    fname = 'benchmarks/%s_releases_stats.csv' % sys.argv[2]
+    with open(fname, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            _release_data[ tuple(row[1:6]) ] = row[6]
+            #print(row[1:6], row[6])
+            releases[ versiontuple(row[2]) ] = row[2]
+    latest_version = releases[ sorted(releases.keys())[-1] ]
+
+    devbranch = sys.argv[3]
+    #info[python][problem][fileformat][branch][date] = float(meanval)
+    for python in info:
+      pp = PdfPages('dog%s_%s_%s.pdf' % (sys.argv[1], devbranch, python))
+      fig, ax = plt.subplots()
+      ax.text(0,0.75,"Figures that compare runtime to generate problem files")
+      ax.text(0,0.70,"    Comparison for Master vs Specified Branch")
+      ax.text(0,0.65,"    Latest Master Tests vs Current Release")
+      ax.axes.get_xaxis().set_visible(False)
+      ax.axes.get_yaxis().set_visible(False)
+      ax.axis('off')
+      pp.savefig()
+      plt.clf()
+
+      print(python)
+      for problem in sorted(info[python].keys()):
+        if 'quick' in problem:
+            continue
+        for fileformat in sorted(info[python][problem].keys()):
+            fig, ax = plt.subplots()
+            line = 0
+
+            print(problem, fileformat)
+            if 'master' not in list(info[python][problem][fileformat].keys()):
+                continue
+            #print("HERE")
+            #print( info[python][problem][fileformat].keys() )
+            for branch in ['master', devbranch]:  #sorted(info[python][problem][fileformat].keys()):
+
+                i = 0
+                y_ = []
+                x_ = []
+                for date in dates:
+                    x_ = [i] + x_
+                    y_.append( info[python][problem][fileformat][branch].get(date, None) )
+                    i -= 1
+
+                if branch == 'master':
+                    x_ = x_ + [1]
+                    y_.append( float(_release_data[ python, latest_version, problem, fileformat, 'total' ]) )
+                else:
+                    x_ = x_ + [1]
+                    y_.append( None )
+
+                #print(fileformat)
+                #print(x_)
+                #print(y_)
+                #ax.plot(x_, y_, 'o-', markersize=2, label=fileformat, c=colors[line])
+                ax.plot(x_, y_, 'o-', markersize=2, label=branch, c=colors[line])
+                line += 1
+
+            ax.set_xlim(left=x_[0], right=x_[-1])
+            ax.set_title("Performance Tests: %s %s %s" % (python, problem, fileformat))
+            ax.set_ylabel("Runtime")
+            ax.set_xlabel("Latest Tests vs Current Release")
+            plt.xticks(x_, x_[:-1] + ["v"+latest_version])
+            #ax.set_xlabel("Test Date")
+            #ax.set_title("Runtime Time to Create File %s.%s (%s)" % (problem, fileformat, python))
+            ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
+
+            plt.subplots_adjust(right=0.7)
+            pp.savefig()
+            plt.clf()
+
+      pp.close()
+
+#
+# History Graphs for MASTER
+#
+elif sys.argv[1] == "23":
+    print("Creating dog%s*.pdf" % sys.argv[1])
+    print(dates)
+    if len(dates) > 100:
+        dates = dates[-100:]
+    #
+    def versiontuple(v):
+        return tuple(map(int, (v.split("."))))
+    _release_data = {}
+    releases = {}
+    fname = 'benchmarks/%s_releases_stats.csv' % sys.argv[2]
+    with open(fname, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            _release_data[ tuple(row[1:6]) ] = row[6]
+            #print(row[1:6], row[6])
+            releases[ versiontuple(row[2]) ] = row[2]
+    latest_version = releases[ sorted(releases.keys())[-1] ]
+
+    devbranch = sys.argv[3]
+    #info[python][problem][fileformat][branch][date] = float(meanval)
+    for python in info:
+      pp = PdfPages('dog%s_%s_%s.pdf' % (sys.argv[1], devbranch, python))
+      fig, ax = plt.subplots()
+      ax.text(0,0.75,"Figures that compare runtime to generate problem files")
+      ax.text(0,0.70,"    Comparison for Master vs Specified Branch")
+      ax.text(0,0.65,"    Latest Master Tests vs Current Release")
+      ax.axes.get_xaxis().set_visible(False)
+      ax.axes.get_yaxis().set_visible(False)
+      ax.axis('off')
+      pp.savefig()
+      plt.clf()
+
+      print(python)
+      for problem in sorted(info[python].keys()):
+        if 'quick' in problem:
+            continue
+        for fileformat in sorted(info[python][problem].keys()):
+            fig, ax = plt.subplots()
+            line = 0
+
+            print(problem, fileformat)
+            if 'master' not in list(info[python][problem][fileformat].keys()):
+                continue
+            latest_baseline = float(_release_data[ python, latest_version, problem, fileformat, 'total' ])
+
+            #print("HERE")
+            #print( info[python][problem][fileformat].keys() )
+            for branch in ['master', devbranch]:  #sorted(info[python][problem][fileformat].keys()):
+
+                i = 0
+                y_ = []
+                x_ = []
+                for date in dates:
+                    x_ = [i] + x_
+                    val = info[python][problem][fileformat][branch].get(date, None)
+                    if not val is None:
+                        val = val/latest_baseline
+                    y_.append( val )
+                    i -= 1
+
+                if branch == 'master':
+                    x_ = x_ + [1]
+                    y_.append( 1.0 )
+                else:
+                    x_ = x_ + [1]
+                    y_.append( None )
+
+                #print(fileformat)
+                #print(x_)
+                #print(y_)
+                #ax.plot(x_, y_, 'o-', markersize=2, label=fileformat, c=colors[line])
+                ax.plot(x_, y_, 'o-', markersize=2, label=branch, c=colors[line])
+                line += 1
+
+            ax.set_xlim(left=x_[0], right=x_[-1])
+            ax.set_title("Performance Tests: %s %s %s" % (python, problem, fileformat))
+            ax.set_ylabel("Runtime")
+            ax.set_xlabel("Latest Tests vs Current Release")
+            plt.xticks(x_, x_[:-1] + ["v"+latest_version])
+            #ax.set_xlabel("Test Date")
+            #ax.set_title("Runtime Time to Create File %s.%s (%s)" % (problem, fileformat, python))
+            ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
+
+            plt.subplots_adjust(right=0.7)
+            pp.savefig()
+            plt.clf()
 
       pp.close()
 
