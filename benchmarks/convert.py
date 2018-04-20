@@ -197,16 +197,10 @@ def run_pyomo(format_, problem, verbose, cwd=None):
             os.chdir(cwd)
         if verbose:
             print("Command: %s" % cmd)
-        try:
-            with timeout(seconds=TIMEOUT):
-                res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
-                if res[0] != 0:
-                    print("Aborting performance testing because an error was generated!: %s" % str(res))
-                    sys.exit(1)
-        except TimeoutError:
-            print("Pyomo exceeded time limit: %d" % TIMEOUT)
-        except:
-            raise
+        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose, timeout=TIMEOUT)
+        if res[0] != 0:
+            print("Aborting performance testing because an error was generated!: %s" % str(res))
+            sys.exit(1)
 
         seconds = {}
         eval_ = evaluate('pyomo.out', seconds, verbose)
@@ -232,23 +226,17 @@ def run_script(format_, problem, verbose, cwd=None):
             print("Command: %s" % cmd)
         _cwd = os.getcwd()
         os.chdir(cwd)
-        try:
-            with timeout(seconds=TIMEOUT):
-                res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose)
-                os.chdir(_cwd)
-                if res[0] != 0:
-                    print("Aborting performance testing because an error was generated!: %s" % str(res))
-                    print("")
-                    print("Pyomo Logfile: ")
-                    INPUT = open('pyomo.out', 'r')
-                    for line in INPUT:
-                        print(line.strip())
-                    print("")
-                    sys.exit(1)
-        except TimeoutError:
-            print("Pyomo exceeded time limit: %d" % TIMEOUT)
-        except:
-            raise
+        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose, timeout=TIMEOUT)
+        os.chdir(_cwd)
+        if res[0] != 0:
+            print("Aborting performance testing because an error was generated!: %s" % str(res))
+            print("")
+            print("Pyomo Logfile: ")
+            INPUT = open('pyomo.out', 'r')
+            for line in INPUT:
+                print(line.strip())
+            print("")
+            sys.exit(1)
 
         seconds = {}
         return evaluate(cwd+'/pyomo.out', seconds, verbose)
