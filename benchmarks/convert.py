@@ -335,7 +335,7 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
 
         sys.stdout.write("\n")
 
-    print("Writing results to file: %s" % rfile)
+    print("Writing results to file: %s (%d lines)" % (rfile, len(data)))
     with open(rfile, 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         for line in data:
