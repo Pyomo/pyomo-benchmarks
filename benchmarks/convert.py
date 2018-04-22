@@ -226,7 +226,7 @@ def run_script(format_, problem, verbose, cwd=None):
             print("Command: %s" % cmd)
         _cwd = os.getcwd()
         os.chdir(cwd)
-        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose, timeout=TIMEOUT)
+        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose, timelimit=TIMEOUT)
         os.chdir(_cwd)
         if res[0] != 0:
             print("Aborting performance testing because an error was generated!: %s" % str(res))
