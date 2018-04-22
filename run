@@ -50,6 +50,7 @@ if test_releases:
 else:
     ofile = "%s_branches.csv" % expname
 if clean and os.path.exists(ofile):
+    print("Removing file %s" % ofile)
     os.remove(ofile)
 
 try:
