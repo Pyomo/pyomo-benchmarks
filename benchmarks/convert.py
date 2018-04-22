@@ -134,13 +134,13 @@ class Xtimeout:
 #
 def measure(f, n=25):
     """measure average execution time over n trials"""
-    data = []
+    _data = []
     for i in range(n):
-        data.append(f())
+        _data.append(f())
         sys.stdout.write('.')
         sys.stdout.flush()
     sys.stdout.write('\n')
-    return data
+    return _data
 
 
 #
@@ -305,8 +305,8 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
                 print("# done: "+str(R-R_))
                 if R_ > 0:
                     values = values = measure(f, n=R_)
-            except:
-                pass
+            except Exception as e:
+                print("EXCEPTION OCCURRED: %s" % str(e))
 
             for key in mykeys:
                 for row in results.get((python, release, exp, format_, key), []):
