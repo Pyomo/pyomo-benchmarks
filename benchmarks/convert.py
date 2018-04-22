@@ -115,7 +115,7 @@ if os.path.exists(auxdir):
 class TimeoutError(Exception):
     pass
 
-class timeout:
+class Xtimeout:
     def __init__(self, seconds=10, error_message='Timeout'):
         self.seconds = seconds
         self.error_message = error_message
@@ -335,6 +335,7 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
 
         sys.stdout.write("\n")
 
+    print("Writing results to file: %s" % rfile)
     with open(rfile, 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         for line in data:
