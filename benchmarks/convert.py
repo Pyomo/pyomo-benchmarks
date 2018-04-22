@@ -197,7 +197,7 @@ def run_pyomo(format_, problem, verbose, cwd=None):
             os.chdir(cwd)
         if verbose:
             print("Command: %s" % cmd)
-        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose, timeout=TIMEOUT)
+        res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose, timelimit=TIMEOUT)
         if res[0] != 0:
             print("Aborting performance testing because an error was generated!: %s" % str(res))
             sys.exit(1)
