@@ -211,7 +211,8 @@ def run_pyomo(format_, problem, verbose, cwd=None):
             print("Pyomo Logfile: ")
             cat('pyomo.out')
             print("")
-            sys.exit(1)
+            os.chdir(_cwd)
+            return {}
 
         seconds = {}
         eval_ = evaluate('pyomo.out', seconds, verbose)
@@ -245,7 +246,7 @@ def run_script(format_, problem, verbose, cwd=None):
             print("Pyomo Logfile: ")
             cat('pyomo.out')
             print("")
-            sys.exit(1)
+            return {}
 
         seconds = {}
         return evaluate(cwd+'/pyomo.out', seconds, verbose)
