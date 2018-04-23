@@ -127,6 +127,13 @@ class Xtimeout:
     def __exit__(self, type, value, traceback):
         signal.alarm(0)
 
+def cat(fname):
+    if not os.path.exists(fname):
+        return
+    with open(fname, 'r') as INPUT:
+        for line in INPUT:
+            sys.stdout.write(line)
+
 
 #
 # Execute a function 'n' times, collecting performance statistics and
@@ -200,6 +207,10 @@ def run_pyomo(format_, problem, verbose, cwd=None):
         res = pyutilib.subprocess.run(cmd, outfile='pyomo.out', verbose=verbose, timelimit=TIMEOUT)
         if res[0] != 0:
             print("Aborting performance testing because an error was generated!: %s" % str(res))
+            print("")
+            print("Pyomo Logfile: ")
+            cat('pyomo.out')
+            print("")
             sys.exit(1)
 
         seconds = {}
@@ -232,9 +243,7 @@ def run_script(format_, problem, verbose, cwd=None):
             print("Aborting performance testing because an error was generated!: %s" % str(res))
             print("")
             print("Pyomo Logfile: ")
-            INPUT = open('pyomo.out', 'r')
-            for line in INPUT:
-                print(line.strip())
+            cat('pyomo.out')
             print("")
             sys.exit(1)
 
