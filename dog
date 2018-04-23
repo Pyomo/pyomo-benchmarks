@@ -15,6 +15,8 @@ colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange',
           'xkcd:olive', 'xkcd:salmon', 'xkcd:beige', 'xkcd:navy blue', 'xkcd:black', 
           'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey', 'xkcd:pink', 'xkcd:yellow', 'xkcd:light purple']
 
+formats = ['lp', 'nl', 'bar', 'gms']
+
 if len(sys.argv) == 1:
     print("dog <id>")
     sys.exit(0)
@@ -338,7 +340,7 @@ elif sys.argv[1] == "10":
             if not line in lines:
                 lines.append(line)
 
-    for format_ in ('nl', 'lp'):
+    for format_ in formats:
       for python in p:
         if python.endswith('cython'):
             continue
@@ -393,7 +395,7 @@ elif sys.argv[1] == "11":
             if not line in lines:
                 lines.append(line)
 
-    for format_ in ('nl', 'lp'):
+    for format_ in formats:
       for python in p:
         for line in p[python]:
             if not (format_, 'total') in p[python][line][labels[python][0]]:
@@ -471,7 +473,7 @@ elif sys.argv[1] == "12":
     ticks.sort()
     #print(ticks)
 
-    for format_ in ('nl', 'lp'):
+    for format_ in formats:
       for python in p:
         if python.endswith('cython'):
             continue
@@ -547,7 +549,7 @@ elif sys.argv[1] == "13":
     ticks.sort()
     #print(ticks)
 
-    for format_ in ('nl', 'lp'):
+    for format_ in formats:
       for python in p:
         if python.endswith('cython'):
             continue
@@ -575,6 +577,8 @@ elif sys.argv[1] == "13":
         #
         # Normalize data
         #
+        if 'master' not in tmp:
+            continue
         for i in range(len(tmp['master'])):
             val = None
             if tmp['master'][i] < 0:
@@ -646,7 +650,7 @@ elif sys.argv[1] == "14":
     #print(ticks)
 
     labels_ = ['master', 'default', 'cython', 'quick', 'quick+cython']
-    for format_ in ('nl', 'lp'):
+    for format_ in formats:
       for python in p:
         if python.endswith('cython'):
             continue
@@ -763,7 +767,7 @@ elif sys.argv[1] == "15":
     csvdata.append( [None, None, None] + ['NORMALIZED DATA', None, None, None, None] + ['RUNTIME DATA', None, None, None, None] )
     csvdata.append( ['Python', 'Format', 'Problem'] + labels_ + labels_ )
 
-    for format_ in ('nl', 'lp'):
+    for format_ in formats:
       for python in p:
         if python.endswith('cython'):
             continue
@@ -865,7 +869,7 @@ elif sys.argv[1] == "16":
     csvdata.append( ['Python', 'Format', 'Problem', labels_[0], None, None, labels_[1], None, None, labels_[2], None, None, labels_[3], None, None, labels_[4], None, None] )
     csvdata.append( [None, None, None] + ['Construct', 'Write', 'Total']*5 )
 
-    for format_ in ('nl', 'lp'):
+    for format_ in formats:
       for python in p:
         if python.endswith('cython'):
             continue
@@ -1159,20 +1163,22 @@ elif sys.argv[1] == "22":
                 if branch == 'master':
                     x_ = x_ + [1]
                     y_.append( float(_release_data[ python, latest_version, problem, fileformat, 'total' ]) )
+                    _size = 4
                 else:
                     x_ = x_ + [1]
                     y_.append( None )
+                    _size = 2
 
                 #print(fileformat)
                 #print(x_)
                 #print(y_)
                 #ax.plot(x_, y_, 'o-', markersize=2, label=fileformat, c=colors[line])
-                ax.plot(x_, y_, 'o-', markersize=2, label=branch, c=colors[line])
+                ax.plot(x_, y_, 'o-', markersize=_size, label=branch, c=colors[line])
                 line += 1
 
             ax.set_xlim(left=x_[0], right=x_[-1])
-            ax.set_title("Performance Tests: %s %s %s" % (python, problem, fileformat))
-            ax.set_ylabel("Runtime")
+            ax.set_title("Tests: %s %s %s" % (python, problem, fileformat))
+            ax.set_ylabel("Runtime (Seconds)")
             ax.set_xlabel("Latest Tests vs Current Release")
             plt.xticks(x_, x_[:-1] + ["v"+latest_version])
             #ax.set_xlabel("Test Date")
@@ -1212,7 +1218,7 @@ elif sys.argv[1] == "23":
     for python in info:
       pp = PdfPages('dog%s_%s_%s.pdf' % (sys.argv[1], devbranch, python))
       fig, ax = plt.subplots()
-      ax.text(0,0.75,"Figures that compare runtime to generate problem files")
+      ax.text(0,0.75,"Figures that compare normalized runtime to generate problem files")
       ax.text(0,0.70,"    Comparison for Master vs Specified Branch")
       ax.text(0,0.65,"    Latest Master Tests vs Current Release")
       ax.axes.get_xaxis().set_visible(False)
@@ -1252,20 +1258,22 @@ elif sys.argv[1] == "23":
                 if branch == 'master':
                     x_ = x_ + [1]
                     y_.append( 1.0 )
+                    _size = 4
                 else:
                     x_ = x_ + [1]
                     y_.append( None )
+                    _size = 2
 
                 #print(fileformat)
                 #print(x_)
                 #print(y_)
                 #ax.plot(x_, y_, 'o-', markersize=2, label=fileformat, c=colors[line])
-                ax.plot(x_, y_, 'o-', markersize=2, label=branch, c=colors[line])
+                ax.plot(x_, y_, 'o-', markersize=_size, label=branch, c=colors[line])
                 line += 1
 
             ax.set_xlim(left=x_[0], right=x_[-1])
-            ax.set_title("Performance Tests: %s %s %s" % (python, problem, fileformat))
-            ax.set_ylabel("Runtime")
+            ax.set_title("Tests: %s %s %s" % (python, problem, fileformat))
+            ax.set_ylabel("Normalized Runtime")
             ax.set_xlabel("Latest Tests vs Current Release")
             plt.xticks(x_, x_[:-1] + ["v"+latest_version])
             #ax.set_xlabel("Test Date")
