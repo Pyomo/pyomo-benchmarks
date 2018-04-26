@@ -302,9 +302,11 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
         exp = name+"_%d" % num
         sys.stdout.write(name+" ")
         if linear:
-            formats = ['lp', 'nl', 'bar', 'gms']
+            #formats = ['lp', 'nl', 'bar', 'gms']
+            formats = ['lp', 'nl']
         else:
-            formats = ['nl', 'bar', 'gms']
+            #formats = ['nl', 'bar', 'gms']
+            formats = ['nl']
         for format_ in formats:
             f = partial(fn, format_, name, num, verbose)()
             values = []
