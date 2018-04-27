@@ -15,8 +15,7 @@ colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange',
           'xkcd:olive', 'xkcd:salmon', 'xkcd:beige', 'xkcd:navy blue', 'xkcd:black', 
           'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey', 'xkcd:pink', 'xkcd:yellow', 'xkcd:light purple']
 
-formats = ['lp', 'nl']
-#formats = ['lp', 'nl', 'bar', 'gms']
+formats = ['lp', 'nl', 'bar', 'gms']
 
 if len(sys.argv) == 1:
     print("dog <id>")
