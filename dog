@@ -1060,7 +1060,10 @@ elif sys.argv[1] == "21":
                     i -= 1
 
                 x_ = x_ + [1]
-                y_.append( float(_release_data[ python, latest_version, problem, fileformat, 'total' ]) )
+                val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
+                if val is not None:
+                    val = float(val)
+                y_.append( val )
 
                 #print(fileformat)
                 #print(x_)
@@ -1162,7 +1165,11 @@ elif sys.argv[1] == "22":
 
                 if branch == 'master':
                     x_ = x_ + [1]
-                    y_.append( float(_release_data[ python, latest_version, problem, fileformat, 'total' ]) )
+                    val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
+                    if val is not None:
+                        y_.append( float(val) )
+                    else:
+                        y_.append( val )
                     _size = 4
                 else:
                     x_ = x_ + [1]
@@ -1238,7 +1245,10 @@ elif sys.argv[1] == "23":
             print(problem, fileformat)
             if 'master' not in list(info[python][problem][fileformat].keys()):
                 continue
-            latest_baseline = float(_release_data[ python, latest_version, problem, fileformat, 'total' ])
+            val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
+            if val is None:
+                continue
+            latest_baseline = float(val)
 
             #print("HERE")
             #print( info[python][problem][fileformat].keys() )
