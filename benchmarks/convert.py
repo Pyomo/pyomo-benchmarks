@@ -71,38 +71,43 @@ def uc1(format_, name, num, verbose):
     return run_pyomo(format_, "%s/uc/ReferenceModel.py %s/uc/2014-09-01-expected.dat" % (auxdir, auxdir), verbose)
 
 #
+# This can be set to a string for a branch name that is 
+# used to filter problems that require a specific branch to run
+#
+dev_branch = None
+#
 # Configuration of test problems
 #
 problems = [
     #-------------------------------------------------------------------
-    #FUNCION                NUM         LINEAR      LARGE       EXPR_DEV
+    #FUNCION                NUM         LINEAR      LARGE       BRANCH
     #-------------------------------------------------------------------
     (pmedian,               4,          True,       False,      False),
-    (pmedian_quick,         4,          True,       False,      True),
+    (pmedian_quick,         4,          True,       False,      False),
     (pmedian,               8,          True,       True,       False),
-    (pmedian_quick,         8,          True,       True,       True),
+    (pmedian_quick,         8,          True,       True,       False),
     (bilinear,              100,        False,      False,      False),
-    (bilinear_quick,        100,        False,      False,      True),
+    (bilinear_quick,        100,        False,      False,      False),
     (bilinear,              100000,     False,      True,       False),
-    (bilinear_quick,        100000,     False,      True,       True),
+    (bilinear_quick,        100000,     False,      True,       False),
     (diag,                  100,        True,       False,      False),
-    (diag_quick,            100,        True,       False,      True),
+    (diag_quick,            100,        True,       False,      False),
     (diag,                  100000,     True,       True,       False),
-    (diag_quick,            100000,     True,       True,       True),
+    (diag_quick,            100000,     True,       True,       False),
     (jump_opf,              662,        False,      False,      False),
-    (jump_opf_quick,        662,        False,      False,      True),
+    (jump_opf_quick,        662,        False,      False,      False),
     (jump_opf,              6620,       False,      True,       False),    #66200   VERY LARGE
-    (jump_opf_quick,        6620,       False,      True,       True),     #66200
+    (jump_opf_quick,        6620,       False,      True,       False),     #66200
     (jump_clnlbeam,         5000,       False,      False,      False),
     (jump_clnlbeam,         50000,      False,      True,       False),    #500000
     (jump_lqcp,             500,        False,      True,       False),
-    (jump_lqcp_quick,       500,        False,      True,       True),
+    (jump_lqcp_quick,       500,        False,      True,       False),
     #(jump_lqcp,             2000,       False,      True,       False),    VERY LARGE
-    #(jump_lqcp_quick,       2000,       False,      True,       True),
+    #(jump_lqcp_quick,       2000,       False,      True,       False),
     (jump_facility,         25,         True,       True,       False),
-    (jump_facility_quick,   25,         True,       True,       True),
+    (jump_facility_quick,   25,         True,       True,       False),
     #(jump_facility,         75,         True,       True,       False),    VERY LARGE
-    #(jump_facility_quick,   75,         True,       True,       True),
+    #(jump_facility_quick,   75,         True,       True,       False),
     (stochpdegas1,          0,          False,      None,       False),
 ]
 if os.path.exists(auxdir):
@@ -254,10 +259,12 @@ def run_script(format_, problem, verbose, cwd=None):
     return f
 
 
-def run(R, rfile, python, release, large, verbose=False, debug=True):
+def run(R, rfile, python, release, large, verbose=False, debug=True, timeout=None):
 
     global TIMEOUT
-    if large:
+    if timeout is not None:
+        TIMEOUT=timeout
+    elif large:
         TIMEOUT=600
     else:
         TIMEOUT=60
@@ -291,12 +298,10 @@ def run(R, rfile, python, release, large, verbose=False, debug=True):
         # specification, or which cannot be run with this
         # release.
         #
-        if dev_ and release != 'expr_dev':
+        if dev_ and release != dev_branch:
             continue
         if not (large_ is None or large == large_):
             continue
-        #if not linear and platform.python_implementation() != 'CPython':
-        #    continue
 
         name = fn.__name__
         exp = name+"_%d" % num
