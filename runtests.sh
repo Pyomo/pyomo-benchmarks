@@ -1,7 +1,7 @@
 #!/bin/sh -v
 
-echo "SKIPPING RUNTESTS"
-exit 0
+#echo "SKIPPING RUNTESTS"
+#exit 0
 
 
 #
