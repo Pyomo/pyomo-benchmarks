@@ -8,7 +8,12 @@ import os
 import shutil
 import csv
 
-using_modules = True
+#
+# Global configurations
+#
+# Testing specific branches
+#
+branches = ['master']
 
 #                   PYOMO           PYUTILIB
 pyutilib_version = {
@@ -40,28 +45,36 @@ config = {
 
 'python3.6':
 {
-'pyomo_version':    ['5.5', '-master', '-expr_dev'],
+'pyomo_version':    ['5.5'],
 },
 'python3.6-cython':
 {
-'pyomo_version':    ['-expr_dev'],
+'pyomo_version':    [],
 },
 
 'python2.7':
 {
-'pyomo_version':    ['5.5', '-master', '-expr_dev'],
+'pyomo_version':    ['5.5'],
 },
 'python2.7-cython':
 {
-'pyomo_version':    ['-expr_dev'],
+'pyomo_version':    [],
 },
 
 'pypy':
 {
-'pyomo_version':    ['5.5', '-master', '-expr_dev'],
+'pyomo_version':    ['5.5'],
 }
 
 }
+
+#
+# Add branches to the configuration
+#
+for key in config:
+    for branch in branches:
+        config[key]['pyomo_version'].append('-'+branch)
+
 """
 config = {
 'python3.6':
@@ -97,6 +110,8 @@ config = {
 
 if len(sys.argv) > 1:
     version = [val for val in all_versions if val in sys.argv[1:]]
+else:
+    version = all_versions
 
 
 for python_ in version:
@@ -120,10 +135,7 @@ for python_ in version:
             print("  Directory exists.  Skipping installation!")
             continue
 
-        if False and using_modules:
-            subprocess.call([sys.executable, '/home/jenkins/bin/pyomo_install', '-p', python, '--venv', testdir, '--venv-only'])
-        else:
-            subprocess.call(['virtualenv', '-p', python, testdir])
+        subprocess.call(['virtualenv', '-p', python, testdir])
         if os.path.exists('%s/bin/easy_install' % testdir):
             subprocess.call(['%s/bin/easy_install' % testdir, 'pip'])
 
