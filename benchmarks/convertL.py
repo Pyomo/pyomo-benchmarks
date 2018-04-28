@@ -2,7 +2,7 @@ import convert
 import sys
 
 #
-# We baseline non-releases with more trials
+# We baseline releases with more trials
 #
 if sys.argv[3][0] in '0123456789':
     R = 10
