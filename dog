@@ -615,7 +615,7 @@ elif sys.argv[1] == "13":
     pp.close()
 
 #
-# Bar graphs - relative comparison between master and other expr_dev variants
+# Bar graphs - relative comparison between master and other branches
 #
 elif sys.argv[1] == "14":
     pp = PdfPages('dog%s.pdf' % sys.argv[1])
@@ -1126,13 +1126,13 @@ elif sys.argv[1] == "22":
             releases[ versiontuple(row[2]) ] = row[2]
     latest_version = releases[ sorted(releases.keys())[-1] ]
 
-    devbranch = sys.argv[3]
+    devbranches = sys.argv[3:]
     #info[python][problem][fileformat][branch][date] = float(meanval)
     for python in info:
-      pp = PdfPages('dog%s_%s_%s.pdf' % (sys.argv[1], devbranch, python))
+      pp = PdfPages('dog%s_%s.pdf' % (sys.argv[1], python))
       fig, ax = plt.subplots()
       ax.text(0,0.75,"Figures that compare runtime to generate problem files")
-      ax.text(0,0.70,"    Comparison for Master vs Specified Branch")
+      ax.text(0,0.70,"    Comparison for Master vs Specified Branches")
       ax.text(0,0.65,"    Latest Master Tests vs Current Release")
       ax.axes.get_xaxis().set_visible(False)
       ax.axes.get_yaxis().set_visible(False)
@@ -1153,7 +1153,7 @@ elif sys.argv[1] == "22":
                 continue
             #print("HERE")
             #print( info[python][problem][fileformat].keys() )
-            for branch in ['master', devbranch]:  #sorted(info[python][problem][fileformat].keys()):
+            for branch in ['master'] + devbranches:  #sorted(info[python][problem][fileformat].keys()):
 
                 i = 0
                 y_ = []
@@ -1220,13 +1220,13 @@ elif sys.argv[1] == "23":
             releases[ versiontuple(row[2]) ] = row[2]
     latest_version = releases[ sorted(releases.keys())[-1] ]
 
-    devbranch = sys.argv[3]
+    devbranches = sys.argv[3:]
     #info[python][problem][fileformat][branch][date] = float(meanval)
     for python in info:
-      pp = PdfPages('dog%s_%s_%s.pdf' % (sys.argv[1], devbranch, python))
+      pp = PdfPages('dog%s_%s.pdf' % (sys.argv[1], python))
       fig, ax = plt.subplots()
       ax.text(0,0.75,"Figures that compare normalized runtime to generate problem files")
-      ax.text(0,0.70,"    Comparison for Master vs Specified Branch")
+      ax.text(0,0.70,"    Comparison for Master vs Specified Branches")
       ax.text(0,0.65,"    Latest Master Tests vs Current Release")
       ax.axes.get_xaxis().set_visible(False)
       ax.axes.get_yaxis().set_visible(False)
@@ -1252,7 +1252,7 @@ elif sys.argv[1] == "23":
 
             #print("HERE")
             #print( info[python][problem][fileformat].keys() )
-            for branch in ['master', devbranch]:  #sorted(info[python][problem][fileformat].keys()):
+            for branch in ['master'] + devbranches:  #sorted(info[python][problem][fileformat].keys()):
 
                 i = 0
                 y_ = []
