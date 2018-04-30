@@ -7,7 +7,7 @@ def create_model(N):
     model.A = RangeSet(N)
     model.x = Var(model.A, bounds=(1,2))
 
-    with nonlinear_expression as expr:
+    with nonlinear_expression() as expr:
         for i in model.A:
             if not (i+1) in model.A:
                 continue
