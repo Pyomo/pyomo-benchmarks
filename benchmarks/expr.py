@@ -11,13 +11,8 @@ import statistics
 
 TODAY = str(datetime.datetime.utcnow())
 
-try:
-    import pyomo.core.expr.current as EXPR
-    from pyomo.repn import generate_standard_repn
-    expr_dev = True
-except:
-    from pyomo.repn import generate_ampl_repn
-    expr_dev = False
+import pyomo.core.expr.current as EXPR
+from pyomo.repn import generate_standard_repn
 
 
 class TimeoutError(Exception):
@@ -471,27 +466,16 @@ def nonl10():
 
 
 
-
-if expr_dev:
-    def trial(func, repn=False):
-        try:
-            with timeout(10):
-                expr = func()
-                if repn:
-                    generate_standard_repn(expr, quadratic=False)
-        except:
-            pass
-else:
-    def trial(func, repn=False):
-        try:
-            with timeout(10):
-                expr = func()
-                if repn:
-                    generate_ampl_repn(expr)
-        except TimeoutError:
-            pass
-        except:
-            raise
+def trial(func, repn=False):
+    try:
+        with timeout(10):
+            expr = func()
+            if repn:
+                generate_standard_repn(expr, quadratic=False)
+    except TimeoutError:
+        pass
+    except:
+        raise
 
 
 def run(N, R, rfile, python, release, skip=False):
