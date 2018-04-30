@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+# summarize file.csv
+
+import os.path
+import csv
+import sys
+import statistics
+
+def read_file(fname, data):
+    print("Loading data from %s" % fname)
+    first = True
+    trials = set()
+    exps = set()
+    with open(fname, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if first:
+                i = row.index('')
+                first = False
+            val = row[i-1]
+            ndx = tuple(row[1:i-1])
+            trials.add(tuple(row[1:3]))
+            exps.add(tuple(row[3:i-1]))
+            if not ndx in data:
+                data[ndx] = []
+            if val != "":
+                data[ndx].append( float(val) )
+    return list(trials), list(exps)
+
+
+if len(sys.argv) != 3:
+    print("compare <baseline> <experiment>")
+
+if not os.path.exists(sys.argv[1]):
+    print("Missing file %s" % sys.argv[1])
+if not os.path.exists(sys.argv[2]):
+    print("Missing file %s" % sys.argv[2])
+
+#
+# Read Data
+#
+olddata = {}
+newdata = {}
+oldtrials, oldexp = read_file(sys.argv[1], olddata)
+newtrials, newexp = read_file(sys.argv[2], newdata)
+
+if len(oldtrials) == len(newtrials):
+    for key in sorted(newexp):
+        _key = tuple(list(oldtrials[0]) + list(key))
+        try:
+            old = olddata[ _key ]
+        except:
+            #print("HERE")
+            #print( _key )
+            continue
+        if len(old) == 0:
+            print("No OLD data")
+            #print(_key)
+            continue
+        if len(old) == 0:
+            print("No NEW data")
+            #print(_key)
+            continue
+        new = newdata[ _key ]
+        val = (statistics.mean( new ) - statistics.mean( old ))/statistics.mean( old )
+        print("%25s %5s %15s %10f %10f %10f %10.4f" % (key[0], key[1], key[2], statistics.mean(old), statistics.mean(new), (statistics.mean( new ) - statistics.mean( old )), 100*val))
+
+else:
+    print("ERROR")
+
