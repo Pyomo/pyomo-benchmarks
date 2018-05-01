@@ -25,12 +25,12 @@ mv dog21_pypy.pdf results/convertL_dog21_pypy.pdf
 mv dog21_python2.7.pdf results/convertL_dog21_python2.7.pdf
 mv dog21_python3.6.pdf results/convertL_dog21_python3.6.pdf
 
-./dog 22 convertL # ADD BRANCHES HERE
+./dog 22 convertL expr_not_variable # ADD BRANCHES HERE
 mv dog22_pypy.pdf results/convertL_dog22_pypy.pdf
 mv dog22_python2.7.pdf results/convertL_dog22_python2.7.pdf
 mv dog22_python3.6.pdf results/convertL_dog22_python3.6.pdf
 
-./dog 23 convertL # ADD BRANCHES HERE
+./dog 23 convertL expr_not_variable # ADD BRANCHES HERE
 mv dog23_pypy.pdf results/convertL_dog23_pypy.pdf
 mv dog23_python2.7.pdf results/convertL_dog23_python2.7.pdf
 mv dog23_python3.6.pdf results/convertL_dog23_python3.6.pdf
