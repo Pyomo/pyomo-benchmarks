@@ -8,6 +8,10 @@ import csv
 import os
 import os.path
 
+if len(sys.argv) ==1 or '-h' in sys.argv or '--help' in sys.argv:
+    print("run <--modules> <--keep> <--releases> <--branches> <expname> <expfile.py> [<expargs> ...]")
+    sys.exit(0)
+
 using_modules = False
 test_releases = False
 clean = True
@@ -27,6 +31,7 @@ while sys.argv[_i].startswith('--'):
         test_releases = False
     _i += 1
 expname = sys.argv[_i]
+exp = sys.argv[(_i+1):]
 
 versions = []
 
@@ -66,14 +71,14 @@ try:
     module unload python27
     module unload pypy2
     module load %s
-    %s/%s/bin/python %s.py %s %s %s
+    %s/%s/bin/python %s -p %s -b %s %s
     module unload %s
     """
             with open('run.sh', 'w') as file:
-                file.write(shstr % (modules[pyver], pythondir, dirname, expname, ofile, pyver, release, modules[pyver]))
+                file.write(shstr % (modules[pyver], pythondir, dirname, " ".join(exp), pyver, release, ofile, modules[pyver]))
             rc = subprocess.call(['/bin/sh', 'run.sh'])
         else:
-            rc = subprocess.call([os.path.abspath('%s/%s/bin/python' % (pythondir, dirname)), expname+'.py', ofile, pyver, release])
+            rc = subprocess.call([os.path.abspath('%s/%s/bin/python' % (pythondir, dirname))] + exp + ["-p", pyver, "-b", release, ofile])
         if rc != 0:
             raise RuntimeError("Unexpected failure")
 except:

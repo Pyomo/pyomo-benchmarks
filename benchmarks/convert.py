@@ -11,6 +11,7 @@ from functools import partial
 import re
 import platform
 import datetime
+import argparse
 
 TODAY = str(datetime.datetime.utcnow())
 TIMEOUT=60
@@ -358,6 +359,68 @@ def run(R, rfile, python, release, large, verbose=False, debug=True, timeout=Non
         for line in data:
             writer.writerow(line)
 
-if __name__ == '__main__':
-    run(3, 'foo.csv', 'dummy', 'curr', True, True, False)
+#
+# Create parser
+#
+#def run(R, rfile, python, release, large, verbose=False, debug=True, timeout=None):
+#
+_pyver = "%s %s" % (platform.python_implementation(), platform.python_version())
+parser = argparse.ArgumentParser(description='Run performance experiments that generate problem files.')
+parser.add_argument('-p', '--python', dest='python', action='store',
+                    default=_pyver,
+                    help='Description of Python version (default: %s)' % _pyver)
+parser.add_argument('-b', '--branch', dest='branch', action='store',
+                    default="master",
+                    help='Description of the project branch being tested (default: master)')
+parser.add_argument('-l', '--large', dest='size', action='store_true',
+                    default=False,
+                    help='Test large problems (default: False)')
+parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                    default=False,
+                    help='Verbose output (default: False)')
+parser.add_argument('-d', '--debug', dest='debug', action='store_true',
+                    default=False,
+                    help='Debugging output (default: False)')
+parser.add_argument('-k', '--keep', dest='keep', action='store_true',
+                    default=False,
+                    help='Keep previous results (default: False)')
+parser.add_argument('-t', '--timeout', dest='timeout', action='store', type=float,
+                    default=str(TIMEOUT),
+                    help='Timeout (default: %s)' % str(TIMEOUT))
+parser.add_argument('-n', '--ntrials', dest='ntrials', action='store', type=int,
+                    default=1,
+                    help='Number of trials (default: 1)')
+parser.add_argument('output_csvfile', help='Results file.')
+
+
+#if __name__ == '__main__':
+#    sys.argv = ['convert', '--ntrials=3', '--large', '--verbose']
+#    #run(3, 'foo.csv', 'dummy', 'curr', True, True, False)
+
+args = parser.parse_args()
+#
+# Print arguments
+#
+print("")
+print("SUMMARY")
+print("-"*70)
+print(" python %30s" % args.python)
+print(" branch %30s" % args.branch)
+print("timeout %30s" % str(args.timeout))
+print("ntrials %30s" % str(args.ntrials))
+print("  large %30s" % str(args.size))
+print("verbose %30s" % str(args.verbose))
+print("  debug %30s" % str(args.debug))
+print("   keep %30s" % str(args.keep))
+print("  ofile %30s" % str(args.output_csvfile))
+print("")
+print("Python Executable: %s" % sys.executable)
+print("-"*70)
+print("")
+#
+# Run the experiments
+#
+if not args.keep and os.path.exists(args.output_csvfile):
+    os.remove(args.output_csvfile)
+run(args.ntrials, args.output_csvfile, args.python, args.branch, args.size, verbose=args.verbose, debug=args.debug, timeout=args.timeout)
 
