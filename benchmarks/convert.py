@@ -1,3 +1,4 @@
+import re
 from pyomo.environ import *
 import timeit
 import signal
@@ -260,7 +261,7 @@ def run_script(format_, problem, verbose, cwd=None):
     return f
 
 
-def run(R, rfile, python, release, large, verbose=False, debug=True, timeout=None):
+def run(R, rfile, python, release, large, verbose=False, debug=True, timeout=None, match=None):
 
     global TIMEOUT
     if timeout is not None:
@@ -274,6 +275,10 @@ def run(R, rfile, python, release, large, verbose=False, debug=True, timeout=Non
     if debug:
         problems = [(pmedian, 4, True, None, False), (diag, 100, True, None, False)]
 
+    if match:
+        prog = re.compile(match)
+    else:
+        prog = None
     mykeys = set()
     results = {}
     data = []
@@ -306,6 +311,9 @@ def run(R, rfile, python, release, large, verbose=False, debug=True, timeout=Non
 
         name = fn.__name__
         exp = name+"_%d" % num
+        if not (prog is None or prog.match(exp)):
+            sys.stdout.write("Skipping test: %s\n" % exp)
+            continue
         sys.stdout.write(name+" ")
         if linear:
             #formats = ['lp', 'nl', 'bar', 'gms']
@@ -381,6 +389,9 @@ parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
                     default=False,
                     help='Debugging output (default: False)')
+parser.add_argument('-r', '--run', dest='run', action='store',
+                    default='.*',
+                    help="A regex that matches problems to run (default: '.*')")
 parser.add_argument('-k', '--keep', dest='keep', action='store_true',
                     default=False,
                     help='Keep previous results (default: False)')
@@ -413,6 +424,7 @@ print("verbose %30s" % str(args.verbose))
 print("  debug %30s" % str(args.debug))
 print("   keep %30s" % str(args.keep))
 print("  ofile %30s" % str(args.output_csvfile))
+print("    run %30s" % str(args.run))
 print("")
 print("Python Executable: %s" % sys.executable)
 print("-"*70)
@@ -422,5 +434,5 @@ print("")
 #
 if not args.keep and os.path.exists(args.output_csvfile):
     os.remove(args.output_csvfile)
-run(args.ntrials, args.output_csvfile, args.python, args.branch, args.size, verbose=args.verbose, debug=args.debug, timeout=args.timeout)
+run(args.ntrials, args.output_csvfile, args.python, args.branch, args.size, verbose=args.verbose, debug=args.debug, timeout=args.timeout, match=args.run)
 
