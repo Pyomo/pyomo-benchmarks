@@ -29,13 +29,18 @@ def read_file(fname, data):
     return list(trials), list(exps)
 
 
-if len(sys.argv) != 3:
-    print("compare <baseline> <experiment>")
+if len(sys.argv) < 3:
+    print("compare <baseline> <experiment> [<problem>]")
+    sys.exit(0)
 
 if not os.path.exists(sys.argv[1]):
     print("Missing file %s" % sys.argv[1])
 if not os.path.exists(sys.argv[2]):
     print("Missing file %s" % sys.argv[2])
+if len(sys.argv) == 4:
+    problem = sys.argv[3]
+else:
+    problem = None
 
 #
 # Read Data
@@ -47,6 +52,8 @@ newtrials, newexp = read_file(sys.argv[2], newdata)
 
 if len(oldtrials) == len(newtrials):
     for key in sorted(newexp):
+        if problem is not None and key[0] != problem:
+            continue
         _key = tuple(list(oldtrials[0]) + list(key))
         try:
             old = olddata[ _key ]
@@ -62,6 +69,7 @@ if len(oldtrials) == len(newtrials):
             print("No NEW data")
             #print(_key)
             continue
+        _key = tuple(list(newtrials[0]) + list(key))
         new = newdata[ _key ]
         val = (statistics.mean( new ) - statistics.mean( old ))/statistics.mean( old )
         print("%25s %5s %15s %10f %10f %10f %10.4f" % (key[0], key[1], key[2], statistics.mean(old), statistics.mean(new), (statistics.mean( new ) - statistics.mean( old )), 100*val))
