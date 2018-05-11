@@ -4,6 +4,7 @@
 #exit 0
 
 mkdir -p results
+\rm results/*
 
 ./dog 13 convertL
 mv dog13.pdf results/convertL_dog13.pdf
