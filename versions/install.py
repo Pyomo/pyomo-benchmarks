@@ -28,7 +28,8 @@ pyutilib_version = {
                     '5.4.3':        '5.6.2',
                     '5.5':          '5.6.3',
                     '-master':      '5.6.3',
-                    '-expr_dev':    '5.6.3'
+                    '-expr_not_variable':    '5.6.3',
+                    '-expr_wo_asnumeric':    '5.6.3'
                     }
 
 all_versions = ['pypy',
