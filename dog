@@ -1127,6 +1127,7 @@ elif sys.argv[1] == "22":
     latest_version = releases[ sorted(releases.keys())[-1] ]
 
     devbranches = sys.argv[3:]
+    print(devbranches)
     #info[python][problem][fileformat][branch][date] = float(meanval)
     for python in info:
       pp = PdfPages('dog%s_%s.pdf' % (sys.argv[1], python))
@@ -1160,7 +1161,10 @@ elif sys.argv[1] == "22":
                 x_ = []
                 for date in dates:
                     x_ = [i] + x_
-                    y_.append( info[python][problem][fileformat][branch].get(date, None) )
+                    if branch in info[python][problem][fileformat].keys():
+                        y_.append( info[python][problem][fileformat][branch].get(date, None) )
+                    else:
+                        y_.append( None )
                     i -= 1
 
                 if branch == 'master':
@@ -1177,6 +1181,7 @@ elif sys.argv[1] == "22":
                     _size = 2
 
                 #print(fileformat)
+                #print(branch)
                 #print(x_)
                 #print(y_)
                 #ax.plot(x_, y_, 'o-', markersize=2, label=fileformat, c=colors[line])
@@ -1259,7 +1264,10 @@ elif sys.argv[1] == "23":
                 x_ = []
                 for date in dates:
                     x_ = [i] + x_
-                    val = info[python][problem][fileformat][branch].get(date, None)
+                    if branch in info[python][problem][fileformat]:
+                        val = info[python][problem][fileformat][branch].get(date, None)
+                    else:
+                        val = None
                     if not val is None:
                         val = val/latest_baseline
                     y_.append( val )
