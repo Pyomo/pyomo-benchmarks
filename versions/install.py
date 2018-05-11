@@ -75,7 +75,7 @@ for key in config:
         config[key]['pyomo_version'].append('-'+branch)
 for branch in branches:
     if branch != 'master':
-        pyutilib_version['-'+branch] = pyutilib_version['master']
+        pyutilib_version['-'+branch] = pyutilib_version['-master']
 
 """
 config = {
