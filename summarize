@@ -14,7 +14,10 @@ def read_file(fname, data):
         reader = csv.reader(f)
         for row in reader:
             if first:
-                i = row.index('')
+                i = None
+                for i_ in range(len(row)):
+                    if row[i_] == '':
+                        i = i_ 
                 first = False
             val = row[i-1]
             ndx = tuple(row[1:i-1])
@@ -58,7 +61,6 @@ data = {}
 fname = 'benchmarks/%s_releases.csv' % sys.argv[1]
 if os.path.exists(fname):
     date = read_file(fname, data)
-    #print(list(data.keys()))
     fname = 'benchmarks/%s_releases_stats.csv' % sys.argv[1]
     compute_stats(fname, data, date, extend=False)
 
@@ -67,7 +69,6 @@ data = {}
 fname = 'benchmarks/%s_branches.csv' % sys.argv[1]
 if os.path.exists(fname):
     date = read_file(fname, data)
-    #print(list(data.keys()))
     fname = 'benchmarks/%s_branches_stats_history.csv' % sys.argv[1]
     compute_stats(fname, data, date, extend=True)
     fname = 'benchmarks/%s_branches_stats.csv' % sys.argv[1]
