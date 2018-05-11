@@ -27,9 +27,7 @@ pyutilib_version = {
                     '5.3':          '5.6',
                     '5.4.3':        '5.6.2',
                     '5.5':          '5.6.3',
-                    '-master':      '5.6.3',
-                    '-expr_not_variable':    '5.6.3',
-                    '-expr_wo_asnumeric':    '5.6.3'
+                    '-master':      '5.6.3'
                     }
 
 all_versions = ['pypy',
@@ -75,6 +73,9 @@ config = {
 for key in config:
     for branch in branches:
         config[key]['pyomo_version'].append('-'+branch)
+for branch in branches:
+    if branch != 'master':
+        pyutilib_version['-'+branch] = pyutilib_version['master']
 
 """
 config = {
