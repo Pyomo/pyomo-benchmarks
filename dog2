@@ -1163,6 +1163,8 @@ elif sys.argv[1] == "22":
             #print( info[python][problem][fileformat].keys() )
             traces = []
             _val = None
+            _baseline = None
+            _missing = True
             for branch in ['master'] + devbranches:  #sorted(info[python][problem][fileformat].keys()):
 
                 i = 0
@@ -1180,9 +1182,11 @@ elif sys.argv[1] == "22":
                     x_ = x_ + [1]
                     val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
                     if val is not None:
+                        if y_[-1] is not None:
+                            _val = y_[-1]
+                            _missing = False
+                        _baseline = float(val)
                         y_.append( float(val) )
-                        if x_[-1] is not None:
-                            _val = 100*(x_[-1] - y_[-1])/y_[-1]
                     else:
                         y_.append( val )
                     _size = 4
@@ -1221,7 +1225,7 @@ elif sys.argv[1] == "22":
                         yaxis=dict(title="Runtime (Seconds)") )
             fig = Figure(data=data, layout=layout)
             fname = "dog22_%s_%s_%s.html" % (python, problem, fileformat)
-            results[python, problem, fileformat] = (fname, _val)
+            results[python, problem, fileformat] = (fname, _val, _baseline, _missing)
             plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
 
             ##ax.set_title("Runtime Time to Create File %s.%s (%s)" % (problem, fileformat, python))
@@ -1234,9 +1238,18 @@ elif sys.argv[1] == "22":
     _formats = list(sorted(formats))
     _problems = list(sorted(problems))
     with open("results/index.html", 'w') as OUTPUT:
-        OUTPUT.write("<html><body>\n")
-        OUTPUT.write("<style>\n")
+        OUTPUT.write('<style type="text/css">\n')
+        OUTPUT.write('a.dark:link { color: lightgrey; } a.dark:visited { color: lightgrey; }\n')
+        OUTPUT.write('a.light:link { color: darkgrey; } a.light:visited { color: darkgrey; }\n')
         OUTPUT.write("tr, th { text-align: right; border: 1px solid black; border-collapse: collapse;}\n")
+        OUTPUT.write("td.missing_data { background-color: darkred; color: white; }\n")
+        OUTPUT.write("td.no_baseline { background-color: red; }\n")
+        OUTPUT.write("td.very_slow { background-color: gold; }\n")
+        OUTPUT.write("td.slow { background-color: yellow; }\n")
+        OUTPUT.write("td.ok { background-color: lightgreen; }\n")
+        OUTPUT.write("td.fast { background-color: green; }\n")
+        OUTPUT.write("td.very_fast { background-color: darkgreen; }\n")
+        OUTPUT.write("td.none { background-color: black; }\n")
         OUTPUT.write("</style>\n")
         # PYTHON
         for python in sorted(info.keys()):
@@ -1256,12 +1269,29 @@ elif sys.argv[1] == "22":
                 for f in _formats:
                     val = results.get( (python, problem, f), None)
                     if val is None:
-                        OUTPUT.write("<td></td>")
+                        OUTPUT.write('<td class="none"></td>')
                     else:
-                        OUTPUT.write('<td align="center"><a href="%s">X</a></td>' % val[0])
+                        _url, _val, _baseline, _missing = val
+                        if _missing:
+                            OUTPUT.write('<td align="center" class="missing_data"><a class="dark" href="%s">NA</a></td>' % _url)
+                        elif _baseline is None:
+                            OUTPUT.write('<td align="center" class="no_baseline"><a class="dark" href="%s">X</a></td>' % _url)
+                        else:
+                            ratio = _val/_baseline
+                            if ratio >= 1.10:
+                                OUTPUT.write('<td align="center" class="very_slow"><a class="light" href="%s">SLOW</a></td>' % _url)
+                            elif ratio >= 1.05:
+                                OUTPUT.write('<td align="center" class="slow"><a class="light" href="%s">SLOW</a></td>' % _url)
+                            elif ratio > 0.95:
+                                OUTPUT.write('<td align="center" class="ok"><a class="light" href="%s">OK</a></td>' % _url)
+                            elif ratio > 0.90:
+                                OUTPUT.write('<td align="center" class="fast"><a class="dark" href="%s">FAST</a></td>' % _url)
+                            else:
+                                OUTPUT.write('<td align="center" class="very_fast"><a class="dark" href="%s">FAST</a></td>' % _url)
                 OUTPUT.write("</tr>\n")
             OUTPUT.write("</table>\n")
             OUTPUT.write("</body></html>\n")
+        OUTPUT.write("<hr>\n")
 
 #
 # History Graphs for MASTER
