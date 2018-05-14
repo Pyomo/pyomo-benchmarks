@@ -404,11 +404,10 @@ parser.add_argument('-n', '--ntrials', dest='ntrials', action='store', type=int,
 parser.add_argument('output_csvfile', help='Results file.')
 
 
-#if __name__ == '__main__':
-#    sys.argv = ['convert', '--ntrials=3', '--large', '--verbose']
-#    #run(3, 'foo.csv', 'dummy', 'curr', True, True, False)
-
 args = parser.parse_args()
+if args.size and str(args.timeout) == str(float(TIMEOUT)):
+    args.timeout = 600.0
+
 #
 # Print arguments
 #
