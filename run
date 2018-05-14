@@ -71,14 +71,14 @@ try:
     module unload python27
     module unload pypy2
     module load %s
-    %s/%s/bin/python %s -p %s -b %s %s
+    %s/%s/bin/python %s -k -p %s -b %s %s
     module unload %s
     """
             with open('run.sh', 'w') as file:
                 file.write(shstr % (modules[pyver], pythondir, dirname, " ".join(exp), pyver, release, ofile, modules[pyver]))
             rc = subprocess.call(['/bin/sh', 'run.sh'])
         else:
-            rc = subprocess.call([os.path.abspath('%s/%s/bin/python' % (pythondir, dirname))] + exp + ["-p", pyver, "-b", release, ofile])
+            rc = subprocess.call([os.path.abspath('%s/%s/bin/python' % (pythondir, dirname))] + exp + ["-k", "-p", pyver, "-b", release, ofile])
         if rc != 0:
             raise RuntimeError("Unexpected failure")
 except:
