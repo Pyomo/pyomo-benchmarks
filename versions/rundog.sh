@@ -6,6 +6,8 @@
 mkdir -p results
 \rm results/*
 
+./dog2 22 convertL expr_not_variable expr_wo_asnumeric # ADD BRANCHES HERE
+
 ./dog 13 convertL
 mv dog13.pdf results/convertL_dog13.pdf
 
@@ -35,4 +37,5 @@ mv dog22_python3.6.pdf results/convertL_dog22_python3.6.pdf
 mv dog23_pypy.pdf results/convertL_dog23_pypy.pdf
 mv dog23_python2.7.pdf results/convertL_dog23_python2.7.pdf
 mv dog23_python3.6.pdf results/convertL_dog23_python3.6.pdf
+
 
