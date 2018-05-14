@@ -1007,8 +1007,8 @@ elif sys.argv[1] == "20":
 elif sys.argv[1] == "21":
     print("Creating dog%s*.pdf" % sys.argv[1])
     print(dates)
-    if len(dates) > 100:
-        dates = dates[-100:]
+    if len(dates) > 25:
+        dates = dates[-25:]
     #
     def versiontuple(v):
         return tuple(map(int, (v.split("."))))
@@ -1115,8 +1115,8 @@ elif sys.argv[1] == "22":
     results = {}
 
     print("Running dog22 %s" % sys.argv[1])
-    if len(dates) > 100:
-        dates = dates[-100:]
+    if len(dates) > 50:
+        dates = dates[-50:]
     #
     def versiontuple(v):
         return tuple(map(int, (v.split("."))))
@@ -1197,15 +1197,28 @@ elif sys.argv[1] == "22":
                 #print(y_)
                 #ax.plot(x_, y_, 'o-', markersize=2, label=fileformat, c=colors[line])
 
-                traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=branch) )
+                traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=branch, text=dates) )
 
                 #ax.plot(x_, y_, 'o-', markersize=_size, label=branch, c=colors[line])
                 #line += 1
 
             data = Data( traces )
 
-            xaxis = dict(title="Latest Tests vs Current Release", tickmode="array", tickvals=x_[:-1] + [1], ticktext=[str(v) for v in x_[:-1]] + ["v"+latest_version], showticklabels=True, range=[x_[0], 2])
-            layout = Layout( title="Python=%s  Problem=%s  Fileformat=%s" % (python, problem, fileformat), showlegend=True, xaxis=xaxis, yaxis=dict(title="Runtime (Seconds)") )
+            xaxis = dict(
+                        title="Latest Tests vs Current Release", 
+                        tickmode="array", 
+                        tickvals=x_[:-1] + [1], 
+                        ticktext=[str(v) for v in x_[:-1]] + ["v"+latest_version], 
+                        showticklabels=True, 
+                        #range=[x_[0], 1],
+                        #rangeslider=dict(range=[nticks-20, nticks]))
+                        #rangeslider=dict(range=[10, 90]))
+                        )
+            layout = Layout( 
+                        title="Python=%s  Problem=%s  Fileformat=%s" % (python, problem, fileformat),
+                        showlegend=True,
+                        xaxis=xaxis,
+                        yaxis=dict(title="Runtime (Seconds)") )
             fig = Figure(data=data, layout=layout)
             fname = "dog22_%s_%s_%s.html" % (python, problem, fileformat)
             results[python, problem, fileformat] = (fname, _val)
