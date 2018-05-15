@@ -145,6 +145,8 @@ for python_ in version:
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'cython'])
         if python == 'pypy' or python == 'python2.7':
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'statistics'])
+        else:
+            subprocess.call(['%s/bin/pip' % testdir, 'install', 'plotly'])
         subprocess.call(['%s/bin/pip' % testdir, 'install', 'six'])
         if pyomo[0] == '-':
             subprocess.call(['%s/bin/pip' % testdir, 'install', 'git+git://github.com/PyUtilib/pyutilib.git'])
