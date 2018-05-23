@@ -6,7 +6,9 @@
 mkdir -p results
 \rm results/*
 
-./versions/python3.6-master/bin/python dog2 22 convertL expr_not_variable expr_wo_asnumeric # ADD BRANCHES HERE
+./versions/python3.6-master/bin/python dog2 22 convertL expr_not_variable expr_wo_asnumeric process_time # ADD BRANCHES HERE
+
+exit 0
 
 ./dog 13 convertL
 mv dog13.pdf results/convertL_dog13.pdf
