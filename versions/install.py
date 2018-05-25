@@ -13,7 +13,7 @@ import csv
 #
 # Testing specific branches
 #
-branches = ['master', 'expr_not_variable', 'expr_wo_asnumeric']
+branches = ['master', 'expr_wo_asnumeric']
 
 #                   PYOMO           PYUTILIB
 pyutilib_version = {
