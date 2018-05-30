@@ -48,7 +48,7 @@ config = {
 },
 'python3.6-cython':
 {
-'pyomo_version':    [],
+'pyomo_version':    ['5.5'],
 },
 
 'python2.7':
@@ -57,7 +57,7 @@ config = {
 },
 'python2.7-cython':
 {
-'pyomo_version':    [],
+'pyomo_version':    ['5.5'],
 },
 
 'pypy':
@@ -72,7 +72,8 @@ config = {
 #
 for key in config:
     for branch in branches:
-        config[key]['pyomo_version'].append('-'+branch)
+        if not (key.endswith('cython') and not branch == 'master'):
+            config[key]['pyomo_version'].append('-'+branch)
 for branch in branches:
     if branch != 'master':
         pyutilib_version['-'+branch] = pyutilib_version['-master']
