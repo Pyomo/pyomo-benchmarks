@@ -1238,6 +1238,9 @@ elif sys.argv[1] == "22":
         OUTPUT.write("td.very_fast { background-color: darkgreen; }\n")
         OUTPUT.write("td.none { background-color: black; }\n")
         OUTPUT.write("</style>\n")
+        OUTPUT.write("<h2>Pyomo Performance Comparisons: Writing Problem Files</h2>\n")
+        OUTPUT.write("<p>The following tables describe the performance ratio for the runtime of Pyomo branches relative to the most recent Pyomo release.</p>\n")
+        OUTPUT.write("<p>The runtime performance includes the time to generate a Pyomo model and write a problem file (in various formats).</p>\n")
         # PYTHON
         for python in sorted(info.keys()):
             OUTPUT.write("<hr>\n")
