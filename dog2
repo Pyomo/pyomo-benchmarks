@@ -1229,6 +1229,7 @@ elif sys.argv[1] == "22":
         OUTPUT.write('a.dark:link { color: lightgrey; } a.dark:visited { color: lightgrey; }\n')
         OUTPUT.write('a.light:link { color: darkgrey; } a.light:visited { color: darkgrey; }\n')
         OUTPUT.write("tr, th { text-align: right; border: 1px solid black; border-collapse: collapse;}\n")
+        OUTPUT.write("td { padding: 5px; }\n")
         OUTPUT.write("td.missing_data { background-color: darkred; color: white; }\n")
         OUTPUT.write("td.no_baseline { background-color: red; }\n")
         OUTPUT.write("td.very_slow { background-color: gold; }\n")
