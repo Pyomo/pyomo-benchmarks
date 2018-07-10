@@ -1388,10 +1388,13 @@ elif sys.argv[1] == "23":
         OUTPUT.write("<h2>Pyomo Performance Comparisons: Writing Problem Files</h2>\n")
         # PYTHON
         OUTPUT.write("<hr>\n")
-        OUTPUT.write("<h3>Relative Performance Summary</h3>\n")
+
+        #
+        # TABLE 1
+        #
+        OUTPUT.write("<h3>Relative Performance Summary - Master</h3>\n")
         OUTPUT.write("<p>The following table describes the performance ratio for the runtime of the Pyomo master branch relative to the most recent Pyomo release.</p>\n")
         OUTPUT.write("<p>The table contains links to nightly performance for select branches of Pyomo.</p>\n")
-        OUTPUT.write("<p></p>\n")
         OUTPUT.write("<p>The runtime measure includes the time to generate a Pyomo model and write a problem file (in various formats).</p>\n")
         OUTPUT.write('<table>\n')
         # HEADER
@@ -1442,5 +1445,63 @@ elif sys.argv[1] == "23":
             OUTPUT.write("</tr>\n")
         OUTPUT.write("</table>\n")
         OUTPUT.write("<hr>\n")
+
+        #
+        # TABLE 2
+        #
+        OUTPUT.write("<h3>Absolute Performance Summary</h3>\n")
+        OUTPUT.write("<p>The following table describes the runtime of the latest execution of the Pyomo master branch.</p>\n")
+        OUTPUT.write("<p>The runtime measure includes the time to generate a Pyomo model and write a problem file (in various formats).</p>\n")
+        OUTPUT.write('<table>\n')
+        # HEADER
+        OUTPUT.write("<tr>\n")
+        OUTPUT.write('<td></td>')
+        npython = len(info.keys())
+        for f in _formats:
+            OUTPUT.write('<th class="gap"></th>')
+            OUTPUT.write('<th colspan="{0}" class="python">{1}</th>'.format(npython, f))
+        OUTPUT.write("</tr>\n")
+        # HEADER2
+        OUTPUT.write("<tr>\n")
+        OUTPUT.write('<th class="problem">Problem</th>')
+        for f in _formats:
+            OUTPUT.write('<th class="gap"></th>')
+            for python in sorted(info.keys()):
+                if python.startswith("python"):
+                    _py = "py"+python[6:]
+                else:
+                    _py = python
+                OUTPUT.write('<th class="python">{0}</th>'.format(_py))
+        OUTPUT.write("</tr>\n")
+        # PROBLEMS
+        for problem in _problems:
+            OUTPUT.write("<tr>\n")
+            OUTPUT.write('<td class="problem">{0}</td>'.format(problem))
+            for f in _formats:
+                OUTPUT.write('<td class="gap"></td>')
+                for python in sorted(info.keys()):
+                    val = results.get( (python, problem, f), None)
+                    if val is None:
+                        OUTPUT.write('<td class="none"></td>')
+                    else:
+                        _url, _val, _baseline, _missing = val
+                        if _missing:
+                            OUTPUT.write('<td align="right" class="missing_data"><a class="dark" href="%s">NA</a></td>' % _url)
+                        else:
+                            ratio = _val/_baseline
+                            if ratio >= 1.10:
+                                OUTPUT.write('<td align="right" class="very_slow"><a class="light" href="%s">%2.2f</a></td>' % (_url,_val))
+                            elif ratio >= 1.05:
+                                OUTPUT.write('<td align="right" class="slow"><a class="light" href="%s">%2.2f</a></td>' % (_url,_val))
+                            elif ratio > 0.95:
+                                OUTPUT.write('<td align="right" class="ok"><a class="light" href="%s">%2.2f</a></td>' % (_url,_val))
+                            elif ratio > 0.90:
+                                OUTPUT.write('<td align="right" class="fast"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
+                            else:
+                                OUTPUT.write('<td align="right" class="very_fast"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
+            OUTPUT.write("</tr>\n")
+        OUTPUT.write("</table>\n")
+        OUTPUT.write("<hr>\n")
+
         OUTPUT.write("</body></html>\n")
 
