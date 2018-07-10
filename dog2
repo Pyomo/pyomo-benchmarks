@@ -1135,16 +1135,6 @@ elif sys.argv[1] == "22":
     print(devbranches)
     #info[python][problem][fileformat][branch][date] = float(meanval)
     for python in info:
-      #pp = PdfPages('dog%s_%s.pdf' % (sys.argv[1], python))
-      #fig, ax = plt.subplots()
-      #ax.text(0,0.75,"Figures that compare runtime to generate problem files")
-      #ax.text(0,0.70,"    Comparison for Master vs Specified Branches")
-      #ax.text(0,0.65,"    Latest Master Tests vs Current Release")
-      #ax.axes.get_xaxis().set_visible(False)
-      #ax.axes.get_yaxis().set_visible(False)
-      #ax.axis('off')
-      #pp.savefig()
-      #plt.clf()
 
       print(python)
       for problem in sorted(info[python].keys()):
@@ -1159,8 +1149,6 @@ elif sys.argv[1] == "22":
             print(problem, fileformat)
             if 'master' not in list(info[python][problem][fileformat].keys()):
                 continue
-            #print("HERE")
-            #print( info[python][problem][fileformat].keys() )
             traces = []
             _val = None
             _baseline = None
@@ -1193,7 +1181,7 @@ elif sys.argv[1] == "22":
 
             if latest is not None:
                 traces.insert(0, latest)
-            data = Data( traces )
+            data = ( traces )
 
             xaxis = dict(
                         title="Latest Tests vs Current Release", 
@@ -1201,9 +1189,6 @@ elif sys.argv[1] == "22":
                         tickvals=x_, 
                         ticktext=[str(v) for v in x_],
                         showticklabels=True, 
-                        #range=[x_[0], 1],
-                        #rangeslider=dict(range=[nticks-20, nticks]))
-                        #rangeslider=dict(range=[10, 90]))
                         )
             layout = Layout( 
                         title="Python=%s  Problem=%s  Fileformat=%s" % (python, problem, fileformat),
@@ -1214,9 +1199,6 @@ elif sys.argv[1] == "22":
             fname = "dog22_%s_%s_%s.html" % (python, problem, fileformat)
             results[python, problem, fileformat] = (fname, _val, _baseline, _missing)
             plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
-
-            ##ax.set_title("Runtime Time to Create File %s.%s (%s)" % (problem, fileformat, python))
-            #ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
 
       pass
     #
@@ -1288,10 +1270,13 @@ elif sys.argv[1] == "22":
 # History Graphs for MASTER
 #
 elif sys.argv[1] == "23":
-    print("Creating dog%s*.pdf" % sys.argv[1])
-    print(dates)
-    if len(dates) > 100:
-        dates = dates[-100:]
+    formats = set()
+    problems = set()
+    results = {}
+
+    print("Running dog23 %s" % sys.argv[1])
+    if len(dates) > 50:
+        dates = dates[-50:]
     #
     def versiontuple(v):
         return tuple(map(int, (v.split("."))))
@@ -1307,37 +1292,27 @@ elif sys.argv[1] == "23":
     latest_version = releases[ sorted(releases.keys())[-1] ]
 
     devbranches = sys.argv[3:]
-    #info[python][problem][fileformat][branch][date] = float(meanval)
+    print(devbranches)
     for python in info:
-      pp = PdfPages('dog%s_%s.pdf' % (sys.argv[1], python))
-      fig, ax = plt.subplots()
-      ax.text(0,0.75,"Figures that compare normalized runtime to generate problem files")
-      ax.text(0,0.70,"    Comparison for Master vs Specified Branches")
-      ax.text(0,0.65,"    Latest Master Tests vs Current Release")
-      ax.axes.get_xaxis().set_visible(False)
-      ax.axes.get_yaxis().set_visible(False)
-      ax.axis('off')
-      pp.savefig()
-      plt.clf()
 
       print(python)
       for problem in sorted(info[python].keys()):
         if 'quick' in problem:
             continue
+        problems.add(problem)
         for fileformat in sorted(info[python][problem].keys()):
-            fig, ax = plt.subplots()
+            formats.add(fileformat)
+            #fig, ax = plt.subplots()
             line = 0
 
             print(problem, fileformat)
             if 'master' not in list(info[python][problem][fileformat].keys()):
                 continue
-            val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
-            if val is None:
-                continue
-            latest_baseline = float(val)
-
-            #print("HERE")
-            #print( info[python][problem][fileformat].keys() )
+            traces = []
+            _val = None
+            _baseline = None
+            _missing = True
+            latest = None
             for branch in ['master'] + devbranches:  #sorted(info[python][problem][fileformat].keys()):
 
                 i = 0
@@ -1345,43 +1320,118 @@ elif sys.argv[1] == "23":
                 x_ = []
                 for date in dates:
                     x_ = [i] + x_
-                    if branch in info[python][problem][fileformat]:
-                        val = info[python][problem][fileformat][branch].get(date, None)
+                    if branch in info[python][problem][fileformat].keys():
+                        y_.append( info[python][problem][fileformat][branch].get(date, None) )
                     else:
-                        val = None
-                    if not val is None:
-                        val = val/latest_baseline
-                    y_.append( val )
+                        y_.append( None )
                     i -= 1
 
+                traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=branch, text=dates) )
+
                 if branch == 'master':
-                    x_ = x_ + [1]
-                    y_.append( 1.0 )
-                    _size = 4
-                else:
-                    x_ = x_ + [1]
-                    y_.append( None )
-                    _size = 2
+                    val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
+                    if val is not None:
+                        if y_[-1] is not None:
+                            _val = y_[-1]
+                            _missing = False
+                        _baseline = float(val)
+                        val = _baseline
+                        latest = Scatter(x=x_, y=[val]*len(x_), mode='lines', name="v"+latest_version)
 
-                #print(fileformat)
-                #print(x_)
-                #print(y_)
-                #ax.plot(x_, y_, 'o-', markersize=2, label=fileformat, c=colors[line])
-                ax.plot(x_, y_, 'o-', markersize=_size, label=branch, c=colors[line])
-                line += 1
+            if latest is not None:
+                traces.insert(0, latest)
+            data = ( traces )
 
-            ax.set_xlim(left=x_[0], right=x_[-1])
-            ax.set_title("Tests: %s %s %s" % (python, problem, fileformat))
-            ax.set_ylabel("Normalized Runtime")
-            ax.set_xlabel("Latest Tests vs Current Release")
-            plt.xticks(x_, x_[:-1] + ["v"+latest_version])
-            #ax.set_xlabel("Test Date")
-            #ax.set_title("Runtime Time to Create File %s.%s (%s)" % (problem, fileformat, python))
-            ax.legend(loc='upper center', bbox_to_anchor=(1.25,1))
+            xaxis = dict(
+                        title="Latest Tests vs Current Release", 
+                        tickmode="array", 
+                        tickvals=x_, 
+                        ticktext=[str(v) for v in x_],
+                        showticklabels=True, 
+                        )
+            layout = Layout( 
+                        title="Python=%s  Problem=%s  Fileformat=%s" % (python, problem, fileformat),
+                        showlegend=True,
+                        xaxis=xaxis,
+                        yaxis=dict(title="Runtime (Seconds)") )
+            fig = Figure(data=data, layout=layout)
+            fname = "dog23_%s_%s_%s.html" % (python, problem, fileformat)
+            results[python, problem, fileformat] = (fname, _val, _baseline, _missing)
+            plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
 
-            plt.subplots_adjust(right=0.7)
-            pp.savefig()
-            plt.clf()
-
-      pp.close()
+      pass
+    #
+    # Create main file
+    #
+    _formats = list(sorted(formats))
+    _problems = list(sorted(problems))
+    with open("results/index.html", 'w') as OUTPUT:
+        OUTPUT.write('<style type="text/css">\n')
+        OUTPUT.write('a.dark:link { color: lightgrey; } a.dark:visited { color: lightgrey; }\n')
+        OUTPUT.write('a.light:link { color: darkgrey; } a.light:visited { color: darkgrey; }\n')
+        OUTPUT.write("tr, th { text-align: right; border: 1px solid black; border-collapse: collapse;}\n")
+        OUTPUT.write("th.problem { text-align: left; border: 1px solid black; }\n")
+        OUTPUT.write("th.python { text-align: center; border: 1px solid black; }\n")
+        OUTPUT.write("th.gap { border: 1px white; }\n")
+        OUTPUT.write("td { padding: 5px; }\n")
+        OUTPUT.write("td.problem { text-align: left; border: 1px solid black; }\n")
+        OUTPUT.write("td.missing_data { background-color: darkred; color: white; }\n")
+        OUTPUT.write("td.no_baseline { background-color: red; }\n")
+        OUTPUT.write("td.very_slow { background-color: gold; }\n")
+        OUTPUT.write("td.slow { background-color: yellow; }\n")
+        OUTPUT.write("td.ok { background-color: lightgreen; }\n")
+        OUTPUT.write("td.fast { background-color: green; }\n")
+        OUTPUT.write("td.very_fast { background-color: darkgreen; }\n")
+        OUTPUT.write("td.none { background-color: black; }\n")
+        OUTPUT.write("tr.gap { }\n")
+        OUTPUT.write("</style>\n")
+        OUTPUT.write("<h2>Pyomo Performance Comparisons: Writing Problem Files</h2>\n")
+        # PYTHON
+        OUTPUT.write("<hr>\n")
+        OUTPUT.write("<h3>Relative Performance Summary</h3>\n")
+        OUTPUT.write("<p>The following table describes the performance ratio for the runtime of the Pyomo master branch relative to the most recent Pyomo release.</p>\n")
+        OUTPUT.write("<p>The table contains links to nightly performance for select branches of Pyomo.</p>\n")
+        OUTPUT.write("<p></p>\n")
+        OUTPUT.write("<p>The runtime measure includes the time to generate a Pyomo model and write a problem file (in various formats).</p>\n")
+        OUTPUT.write('<table>\n')
+        # HEADER
+        OUTPUT.write("<tr>\n")
+        OUTPUT.write('<th class="problem">Problem</th>')
+        nformats = len(_formats)
+        for python in sorted(info.keys()):
+            OUTPUT.write('<th class="gap"></th>')
+            OUTPUT.write('<th colspan="{0}" class="python">{1}</th>'.format(nformats, python))
+        OUTPUT.write("</tr>\n")
+        # PROBLEMS
+        for problem in _problems:
+            OUTPUT.write("<tr>\n")
+            OUTPUT.write('<td class="problem">{0}</td>'.format(problem))
+            for python in sorted(info.keys()):
+                OUTPUT.write('<td class="gap"></td>')
+                for f in _formats:
+                    val = results.get( (python, problem, f), None)
+                    if val is None:
+                        OUTPUT.write('<td class="none"></td>')
+                    else:
+                        _url, _val, _baseline, _missing = val
+                        if _missing:
+                            OUTPUT.write('<td align="center" class="missing_data"><a class="dark" href="%s">NA</a></td>' % _url)
+                        elif _baseline is None:
+                            OUTPUT.write('<td align="center" class="no_baseline"><a class="dark" href="%s">X</a></td>' % _url)
+                        else:
+                            ratio = _val/_baseline
+                            if ratio >= 1.10:
+                                OUTPUT.write('<td align="center" class="very_slow"><a class="light" href="%s">%2.2f</a></td>' % (_url,ratio))
+                            elif ratio >= 1.05:
+                                OUTPUT.write('<td align="center" class="slow"><a class="light" href="%s">%2.2f</a></td>' % (_url,ratio))
+                            elif ratio > 0.95:
+                                OUTPUT.write('<td align="center" class="ok"><a class="light" href="%s">%2.2f</a></td>' % (_url,ratio))
+                            elif ratio > 0.90:
+                                OUTPUT.write('<td align="center" class="fast"><a class="dark" href="%s">%2.2f</a></td>' % (_url,ratio))
+                            else:
+                                OUTPUT.write('<td align="center" class="very_fast"><a class="dark" href="%s">%2.2f</a></td>' % (_url,ratio))
+            OUTPUT.write("</tr>\n")
+        OUTPUT.write("</table>\n")
+        OUTPUT.write("<hr>\n")
+        OUTPUT.write("</body></html>\n")
 

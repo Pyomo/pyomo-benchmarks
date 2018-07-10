@@ -6,7 +6,7 @@
 mkdir -p results
 \rm results/*
 
-./versions/python3.6-master/bin/python dog2 22 convertL # ADD BRANCHES HERE
+./versions/python3.6-master/bin/python dog2 23 convertL # ADD BRANCHES HERE
 
 exit 0
 
