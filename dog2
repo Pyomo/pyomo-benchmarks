@@ -1396,11 +1396,20 @@ elif sys.argv[1] == "23":
         OUTPUT.write('<table>\n')
         # HEADER
         OUTPUT.write("<tr>\n")
-        OUTPUT.write('<th class="problem">Problem</th>')
+        OUTPUT.write('<td></td>')
         nformats = len(_formats)
         for python in sorted(info.keys()):
             OUTPUT.write('<th class="gap"></th>')
             OUTPUT.write('<th colspan="{0}" class="python">{1}</th>'.format(nformats, python))
+        OUTPUT.write("</tr>\n")
+        # HEADER2
+        OUTPUT.write("<tr>\n")
+        OUTPUT.write('<th class="problem">Problem</th>')
+        nformats = len(_formats)
+        for python in info.keys():
+            OUTPUT.write('<th class="gap"></th>')
+            for f in _formats:
+                OUTPUT.write('<th class="python">{0}</th>'.format(f))
         OUTPUT.write("</tr>\n")
         # PROBLEMS
         for problem in _problems:
