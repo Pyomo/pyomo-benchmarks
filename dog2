@@ -1133,7 +1133,6 @@ elif sys.argv[1] == "22":
 
     devbranches = sys.argv[3:]
     print(devbranches)
-    #info[python][problem][fileformat][branch][date] = float(meanval)
     for python in info:
 
       print(python)
@@ -1143,7 +1142,6 @@ elif sys.argv[1] == "22":
         problems.add(problem)
         for fileformat in sorted(info[python][problem].keys()):
             formats.add(fileformat)
-            #fig, ax = plt.subplots()
             line = 0
 
             print(problem, fileformat)
@@ -1273,6 +1271,7 @@ elif sys.argv[1] == "23":
     formats = set()
     problems = set()
     results = {}
+    lines = {}
 
     print("Running dog23 %s" % sys.argv[1])
     if len(dates) > 50:
@@ -1290,9 +1289,13 @@ elif sys.argv[1] == "23":
             #print(row[1:6], row[6])
             releases[ versiontuple(row[2]) ] = row[2]
     latest_version = releases[ sorted(releases.keys())[-1] ]
-
     devbranches = sys.argv[3:]
     print(devbranches)
+
+
+    #
+    # GRAPHS 1
+    #
     for python in info:
 
       print(python)
@@ -1327,6 +1330,7 @@ elif sys.argv[1] == "23":
                     i -= 1
 
                 traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=branch, text=dates) )
+                lines[python, problem, fileformat, branch] = (x_, y_)
 
                 if branch == 'master':
                     val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
@@ -1359,12 +1363,53 @@ elif sys.argv[1] == "23":
             results[python, problem, fileformat] = (fname, _val, _baseline, _missing)
             plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
 
-      pass
     #
-    # Create main file
+    # GRAPHS 2
     #
     _formats = list(sorted(formats))
     _problems = list(sorted(problems))
+    _python = list(sorted(info.keys()))
+    results2 = {}
+    for problem in _problems:
+        for fileformat in _formats:
+            traces = []
+            _val = {}
+            for python in _python:
+                x_, y_ = lines.get( (python, problem, fileformat, "master"), (None, None))
+                #print((python, problem, fileformat, "master", _x, _y))
+                _val[python] = None
+                _baseline = None
+                if x_ is not None:
+                    val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
+                    if val is not None:
+                        if y_[-1] is not None:
+                            _val[python] = y_[-1]
+                        _baseline = float(val)
+                    traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=python, text=dates) )
+            data = ( traces )
+
+            fname = "dog23b_%s_%s.html" % (problem, fileformat)
+            results2[problem, fileformat] = (fname, _val, _baseline, len(data) == 0)
+            if len(data) > 0:
+                xaxis = dict(
+                            title="Latest Tests vs Current Release", 
+                            tickmode="array", 
+                            tickvals=x_, 
+                            ticktext=[str(v) for v in x_],
+                            showticklabels=True, 
+                            )
+                layout = Layout( 
+                            title="Problem=%s  Fileformat=%s" % (problem, fileformat),
+                            showlegend=True,
+                            xaxis=xaxis,
+                            yaxis=dict(title="Runtime (Seconds)") )
+                fig = Figure(data=data, layout=layout)
+                plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
+
+
+    #
+    # Create main file
+    #
     with open("results/index.html", 'w') as OUTPUT:
         OUTPUT.write('<style type="text/css">\n')
         OUTPUT.write('a.dark:link { color: lightgrey; } a.dark:visited { color: lightgrey; }\n')
@@ -1479,14 +1524,17 @@ elif sys.argv[1] == "23":
             OUTPUT.write('<td class="problem">{0}</td>'.format(problem))
             for f in _formats:
                 OUTPUT.write('<td class="gap"></td>')
+                val = results2.get( (problem, f), None)
                 for python in sorted(info.keys()):
-                    val = results.get( (python, problem, f), None)
                     if val is None:
                         OUTPUT.write('<td class="none"></td>')
                     else:
                         _url, _val, _baseline, _missing = val
+                        _val = _val[python]
                         if _missing:
-                            OUTPUT.write('<td align="right" class="missing_data"><a class="dark" href="%s">NA</a></td>' % _url)
+                            OUTPUT.write('<td class="none"></td>')
+                        elif _val is None:
+                            OUTPUT.write('<td align="center" class="no_baseline"><a class="dark" href="%s">NA</a></td>' % _url)
                         elif _baseline is None:
                             OUTPUT.write('<td align="center" class="no_baseline"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
                         else:
