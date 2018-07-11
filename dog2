@@ -1487,6 +1487,8 @@ elif sys.argv[1] == "23":
                         _url, _val, _baseline, _missing = val
                         if _missing:
                             OUTPUT.write('<td align="right" class="missing_data"><a class="dark" href="%s">NA</a></td>' % _url)
+                        elif _baseline is None:
+                            OUTPUT.write('<td align="center" class="no_baseline"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
                         else:
                             ratio = _val/_baseline
                             if ratio >= 1.10:
