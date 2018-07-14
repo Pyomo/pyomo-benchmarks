@@ -1374,18 +1374,21 @@ elif sys.argv[1] == "23":
         for fileformat in _formats:
             traces = []
             _val = {}
+            _baseline = {}
             for python in _python:
                 x_, y_ = lines.get( (python, problem, fileformat, "master"), (None, None))
                 #print((python, problem, fileformat, "master", _x, _y))
                 _val[python] = None
-                _baseline = None
+                _baseline[python] = None
                 if x_ is not None:
+                    if y_[-1] is not None:
+                        _val[python] = y_[-1]
                     val = _release_data.get((python, latest_version, problem, fileformat, 'total'), None)
                     if val is not None:
-                        if y_[-1] is not None:
-                            _val[python] = y_[-1]
-                        _baseline = float(val)
+                        _baseline[python] = float(val)
                     traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=python, text=dates) )
+                #if _val[python] is None:
+                #    print((problem, fileformat, python, x_ is None, val, y_[-1] if y_ is not None else -1, _val[python]))
             data = ( traces )
 
             fname = "dog23b_%s_%s.html" % (problem, fileformat)
@@ -1531,6 +1534,7 @@ elif sys.argv[1] == "23":
                     else:
                         _url, _val, _baseline, _missing = val
                         _val = _val[python]
+                        _baseline = _baseline[python]
                         if _missing:
                             OUTPUT.write('<td class="none"></td>')
                         elif _val is None:
