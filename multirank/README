@@ -1,0 +1,86 @@
+MultiRank : Python tools for rank-based multivariate two-sample test, change-point detection and estimation.
+
+This work is copyright Alexandre Lung-Yut-Fong, Céline Lévy-Leduc, Olivier Cappé.
+###### INSTALLATION #######
+No installation package for the moment, sorry ;p
+multirank.py, multirankCP.py dynkw.py and besselZ.txt have to be in a
+directory in your PYTHONPATH, or in current directory.
+
+Requirements for this to run is python-numpy and python-scipy.
+
+###### USAGE ############
+Data : X, numpy array of size : dimension x #samples
+
+for example, if data is in a text file _example.dat_, you can use
+numpy.loadtxt to load the data:
+
+>>> import numpy
+>>> X = numpy.loadtxt('example.dat')
+
+
+See for example the content of test.py for use cases.
+This example case can also be run in the command line :
+
+> python test.py
+
+
+################
+Homogeneity test:
+
+X : data
+C : missing/censorship state ( use ones(X.shape) if no censorship)
+tau : location of the "change"
+
+Use cases :
+
+from multirank import multirank
+
+stat,pval =  multirank(X,C,tau)
+
+or with : 
+
+Tn_array,G,stat = multirank(X,C,tau,pvalout=False)
+
+where:
+ Tn_array = marginal statistic
+ G : covariance matrix
+ stat : multirank statistic
+
+Pvalue can be calculated with scipy.stats.chi2(dimension).sf(stat)
+
+#######################
+Change point detection:
+
+from multirankCP import multiRankChangePointDetect
+
+maxVal,maxPos,pval,nLib,stats = multiRankChangePointDetect(X,C)
+
+where
+ maxVal : value of the max of the s
+ maxPos : position of the change
+ pval : p-value
+ nLib : number of dimensions taken into account
+ stats : value of all statistics, for every possible position.
+
+
+#########################
+Mutiple change estimation
+
+from dynkw import *
+
+
+# automatic function, with estimation of the number of changes
+numCh, changePointPositions = autoDynKWRupt(x,Kmax=12)
+
+(also see autoDynMultiLinear and autoDynKernel for linear and kernel versions)
+
+stats,changePoints = DynMultiKW(X,Kmax=20)
+
+where :
+ stats = value of stats
+ changePoints : position of the changes, for number of changes from 0 to Kmax
+
+
+use stats with rupturepente(stats) to estimate the number of changes
+
+See also DynKernel and DynMultiLinear
