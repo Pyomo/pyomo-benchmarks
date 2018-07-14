@@ -116,7 +116,7 @@ def multirank(X,C,tau,pvalout=True,
 
     t0 = float(tau)/P
 
-    if nbSma == None or nbGreat == None:
+    if nbSma is None or nbGreat is None:
         nbSma,nbGreat = createCDFTables(Xsup,Xinf)
 
     
@@ -135,7 +135,7 @@ def multirank(X,C,tau,pvalout=True,
 
     ### construit la matrice de correlation
 
-    if invMatrix == None:
+    if invMatrix is None:
   
         G = t0*(1-t0)*cov((nbSma-nbGreat)/float(P),bias=1)
         
