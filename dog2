@@ -12,12 +12,27 @@ import plotly.offline
 from plotly.graph_objs import *
 from plotly import tools
 from multirank.dynkw import autoDynKWRupt
+import random
+import urllib
 
-colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange', 
+url = 'http://xkcd.com/color/rgb.txt'
+page = urllib.request.urlopen(url)
+xkcd_colors = {}
+for line in page:
+    line_ = line.decode('ascii')
+    if 'License' in line_:
+        continue
+    name, color = line_.split('#')
+    name = name.strip()
+    color = color.strip()
+    xkcd_colors['xkcd:'+name] = color
+
+colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:electric purple', 'xkcd:orange', 
           'xkcd:light blue', 'xkcd:teal', 'xkcd:magenta', 'xkcd:grey',
           'xkcd:turquoise', 'xkcd:cyan', 'xkcd:maroon',
           'xkcd:olive', 'xkcd:salmon', 'xkcd:beige', 'xkcd:navy blue', 'xkcd:black', 
-          'xkcd:hot pink', 'xkcd:burnt', 'xkcd:bluegray', 'xkcd:battleship grey', 'xkcd:pink', 'xkcd:yellow', 'xkcd:light purple']
+          'xkcd:hot pink', 'xkcd:burnt yellow', 'xkcd:blue grey', 'xkcd:battleship grey', 'xkcd:pink', 'xkcd:yellow', 'xkcd:light purple']
+colors_rgb = [xkcd_colors[color] for color in colors]
 
 formats = ['lp', 'nl', 'bar', 'gms']
 
@@ -1449,36 +1464,41 @@ elif sys.argv[1] == "23":
     #
     # GRAPHS 4
     #
+
+    #
+    # Compute change points
+    #
+    ncp = {}
+    cp = {}
+    breaks = {}
+    ymin = {}
+    ymax = {}
     for fileformat in _formats:
         for python in _python:
-            traces = []
+            print((python, fileformat))
             ignore = set()
             vals_ = []
+            ntraces = 0
             for problem in _problems:
                 x_, y_ = lines.get( (python, problem, fileformat, "master"), (None, None))
                 if x_ is not None:
+                    ymax[python, fileformat, ntraces] = max(v for v in y_ if v is not None)
+                    ymin[python, fileformat, ntraces] = min(v for v in y_ if v is not None)
                     npoints = len(y_)
-                    i = npoints-1
-                    while i >= 0 and y_[i] is None:
-                        i = i - 1
-                    if i >= 0:
-                        for i in range(npoints):
-                            if y_[i] is None:
-                                ignore.add(i)
-                        vals_.append(y_)
-                        traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=problem, text=dates) )
-            data = ( traces )
+                    for i in range(npoints):
+                        if y_[i] is None:
+                            ignore.add(i)
+                    vals_.append(y_)
+                    ntraces += 1
             if len(data) == 0:
                 print("WARNING: No plots for Python=%s FileFormat=%s" % (python, fileformat))
                 continue
-
             #
             # Compute change points
             #
-            #print(("NPOINTS", npoints))
-            #print(("NIGNORE", len(ignore)))
-            vals = np.zeros( (len(traces), npoints-len(ignore)) )
-            breaks = []
+            print(("NPOINTS", npoints))
+            print(("NIGNORE", len(ignore)))
+            vals = np.zeros( (ntraces, npoints-len(ignore)) )
             breakmap = [None]*(npoints-len(ignore))
             for i, y_ in enumerate(vals_):
                 k = 0
@@ -1487,22 +1507,61 @@ elif sys.argv[1] == "23":
                         vals[i, k] = val
                         breakmap[k] = j
                         k += 1
+            #print(vals)
             numCh,chP = autoDynKWRupt(vals)
+            ncp[python, fileformat] = numCh
             print((python, fileformat))
             print(("numCh", numCh))
+            breaks[python, fileformat] = []
             for i in range(numCh):
-                print(breakmap[chP[i]])
+                breaks[python, fileformat].append( breakmap[chP[i]] )
+                cp[breakmap[chP[i]]] = cp.get(breakmap[chP[i]], 0) + 1
+                print((breakmap[chP[i]], breakmap[chP[i]]-49))
                 #for j, y_ in enumerate(vals_):
                     #traces.append( Scatter(x=[breaks[i]]*2, y=[min(vals_[i])val]*len(x_), mode='lines')
-
+    #
+    # Find the change points that are common across our python/fileformat statistical tests
+    #
+    tmp = list(sorted(cp.keys()))
+    common_cp = set()
+    for i in range(1,len(tmp)-1):
+        if tmp[i-1] == tmp[i]-1 and tmp[i+1] == tmp[i]+1 and cp[tmp[i]] >=3 and cp[tmp[i]] > cp[tmp[i-1]] and cp[tmp[i]] > cp[tmp[i+1]]:
+            print((tmp[i], tmp[i]-48.5, cp[tmp[i]]))
+            common_cp.add(tmp[i])
+    #
+    # Now create the graph
+    #
+    for fileformat in _formats:
+        for python in _python:
+            traces = []
+            for problem in _problems:
+                x_, y_ = lines.get( (python, problem, fileformat, "master"), (None, None))
+                if x_ is not None:
+                    npoints = len(y_)
+                    i = npoints-1
+                    while i >= 0 and y_[i] is None:
+                        i = i - 1
+                    if i >= 0:
+                        traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=problem, text=dates, marker=dict(color=colors_rgb[len(traces)]), line=dict(color=colors_rgb[len(traces)])) )
+            data = ( traces )
+            if len(data) == 0:
+                print("WARNING: No plots for Python=%s FileFormat=%s" % (python, fileformat))
+                continue
             #
             # Create graph
             #
             fig = tools.make_subplots(rows=len(traces), cols=1, shared_yaxes=False, shared_xaxes=True)
             for i in range(len(traces)):
                 fig.append_trace( traces[i], i+1, 1 )
-                for j in range(numCh):
-                    fig.append_trace( Scatter(x=[breakmap[chP[j]]-48.5]*2, y=[min(v for v in vals_[i] if v is not None), max(v for v in vals_[i] if v is not None)], mode='lines', showlegend=False, line=dict(color="black", width=3)), i+1, 1 )
+                for cp in common_cp:
+                    color = 'black'
+                    fig.append_trace( Scatter(x=[cp-48.5]*2, y=[ymin[python, fileformat, i], ymax[python, fileformat, i]], mode='lines', showlegend=False, line=dict(color=color, width=3)), i+1, 1 )
+                #for j in range(ncp[python, fileformat]):
+                    #if breaks[python, fileformat][j] in common_cp:
+                    #    color = 'red'
+                    #else:
+                    #    color = 'black'
+                    #fig.append_trace( Scatter(x=[breaks[python, fileformat][j]-48.5]*2, y=[ymin[python, fileformat, i], ymax[python, fileformat, i]], mode='lines', showlegend=False, line=dict(color=color, width=3)), i+1, 1 )
             fname = "dog23_stacked_%s_%s.html" % (fileformat, python)
             xaxis = dict(
                         title="Performance Relative to Current Performance", 
@@ -1511,8 +1570,6 @@ elif sys.argv[1] == "23":
                         ticktext=[str(v) for v in x_],
                         showticklabels=True, 
                         )
-            #print(type(fig))
-            #print(fig['layout'])
             fig['layout'].update(
                         title="Python=%s  Fileformat=%s" % (python, fileformat),
                         showlegend=True,
@@ -1651,7 +1708,7 @@ elif sys.argv[1] == "23":
                         elif _val is None:
                             OUTPUT.write('<td align="center" class="no_baseline"><a class="dark" href="%s">NA</a></td>' % _url)
                         elif _baseline is None:
-                            OUTPUT.write('<td align="center" class="no_baseline"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
+                            OUTPUT.write('<td align="center" class="missing_data"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
                         else:
                             ratio = _val/_baseline
                             if ratio >= 1.10:
@@ -1687,7 +1744,7 @@ elif sys.argv[1] == "23":
             for python in _python:
                 OUTPUT.write('<td align="left" class="problem">%s</td>' % python)
                 for fileformat in _formats:
-                    OUTPUT.write('<td><a align="center" href="dog23_relative_%s_%s.html">___</a></td>' % (fileformat, python))
+                    OUTPUT.write('<td class="very_fast"><a align="center" href="dog23_relative_%s_%s.html">___</a></td>' % (fileformat, python))
                 OUTPUT.write("</tr>\n")
             OUTPUT.write("</table>\n")
             OUTPUT.write("<hr>\n")
@@ -1696,7 +1753,7 @@ elif sys.argv[1] == "23":
         # Stacked Graphs
         #
         OUTPUT.write("<h3>Performance Trends</h3>\n")
-        OUTPUT.write("<p>The following graphs show the performance trends relative to the runtime of the latest execution of the Pyomo master branch.</p>\n")
+        OUTPUT.write("<p>The following graphs show the performance trends for Pyomo on each test problem.  The number in the table below is the number of statistical changepoints detected across Pyomo's performance for a python-fileformat pair.</p>\n")
         OUTPUT.write("<p>The runtime measure includes the time to generate a Pyomo model and write a problem file (in various formats).</p>\n")
         OUTPUT.write("<p></p>\n")
         OUTPUT.write('<table>\n')
@@ -1704,13 +1761,13 @@ elif sys.argv[1] == "23":
         OUTPUT.write("<tr>\n")
         OUTPUT.write('<td></td>')
         for fileformat in _formats:
-            OUTPUT.write('<td class="python">%s</td>' % fileformat)
+            OUTPUT.write('<th class="python">%s</th>' % fileformat)
         OUTPUT.write("</tr>\n")
         # FILE FORMATS
         for python in _python:
             OUTPUT.write('<td align="left" class="problem">%s</td>' % python)
             for fileformat in _formats:
-                OUTPUT.write('<td><a align="center" href="dog23_stacked_%s_%s.html">___</a></td>' % (fileformat, python))
+                OUTPUT.write('<td class="very_fast"><a class="dark" href="dog23_stacked_%s_%s.html">___</a></td>' % (fileformat, python))
             OUTPUT.write("</tr>\n")
         OUTPUT.write("</table>\n")
         OUTPUT.write("<hr>\n")
