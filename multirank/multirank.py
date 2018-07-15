@@ -120,7 +120,7 @@ def multirank(X,C,tau,pvalout=True,
         nbSma,nbGreat = createCDFTables(Xsup,Xinf)
 
     
-    for k in xrange(K):
+    for k in range(K):
 
         t = 0
 
