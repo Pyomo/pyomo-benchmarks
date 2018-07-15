@@ -4,7 +4,7 @@ from multirankCP import multiRankChangePointDetect
 from dynkw import autoDynKWRupt, DynMultiKW
 from multirank import multirank
 
-print "Example of the change-point detection test:"
+print("Example of the change-point detection test:")
 
 X = numpy.random.randn(5,100)
 
@@ -12,15 +12,15 @@ X[:,35:] += 1
 
 maxVal,maxPos,pval,nLib,stats = multiRankChangePointDetect(X,numpy.ones(X.shape))
 
-print "Changepoint at position",
-print maxPos,
-print "with p-value of ",
-print pval
+print("Changepoint at position",)
+print(maxPos,)
+print("with p-value of ",)
+print(pval)
 
 
 #### Multichange point estimation
 
-print "\nMultiple change-point estimation"
+print("\nMultiple change-point estimation")
 
 winLength = 500
 nDim = 5
@@ -44,12 +44,12 @@ stats,chgP = DynMultiKW(Y)
 
 knownNbChg = chgP[4]
 
-print numCh,
-print "were found in the signal, segment finishes at positions",
+print(numCh,)
+print("were found in the signal, segment finishes at positions",)
 
-print chP[chP!=0]
-print "If you know that the number of change points is 4, the positions are", 
-print knownNbChg[knownNbChg!=0]
+print(chP[chP!=0])
+print("If you know that the number of change points is 4, the positions are", )
+print(knownNbChg[knownNbChg!=0])
 
 ### Test for homogeneity
 
@@ -58,8 +58,8 @@ X = numpy.random.randn(5,500)
 
 
 stat,pval = multirank(X,numpy.ones(X.shape),240)
-print "\ntest for homogeneity:"
-print "test statistic:",
-print stat,
-print "p-value:",
-print pval
+print("\ntest for homogeneity:")
+print("test statistic:",)
+print(stat,)
+print("p-value:",)
+print(pval)
