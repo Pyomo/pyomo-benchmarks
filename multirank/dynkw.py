@@ -13,9 +13,9 @@ import numpy
 from numpy import searchsorted,empty,zeros,triu,arange,argmax,diag,eye,cov,dot,inf,sqrt,mean,exp,isnan,argmin
 from numpy.random import permutation
 from numpy.matlib import repmat
-from multirankCP import multiRankChangePointDetect
+from . multirankCP import multiRankChangePointDetect
 from scipy.stats import chi2
-from multirank import createCDFTables
+from . multirank import createCDFTables
 
 import numpy
 

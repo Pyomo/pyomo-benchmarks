@@ -3,15 +3,17 @@ MultirankCP module for change-point detection.
 Main function :
 multiRankChangePointDetect
 """
+import inspect, os
 from numpy import loadtxt,asarray,exp
 from scipy.optimize.zeros import brentq
 from scipy.special import gamma,jv
 
-from multirank import *
+from . multirank import *
 
 
 ## WARNING : only works for up to 100 dimensions !
-zerosBessel = loadtxt("besselZ.txt") # zerosBessel[i,j] = j+1 th zero of J(i+1-2/2)
+currdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+zerosBessel = loadtxt(os.path.join(currdir, "besselZ.txt")) # zerosBessel[i,j] = j+1 th zero of J(i+1-2/2)
 nD,nN = zerosBessel.shape
 ## NU = arange(1.,nD+1)/2-1  # h-2 /2
 

@@ -1,8 +1,8 @@
 import numpy 
 from numpy import zeros,sqrt
-from multirankCP import multiRankChangePointDetect
-from dynkw import autoDynKWRupt, DynMultiKW
-from multirank import multirank
+from multirank.multirankCP import multiRankChangePointDetect
+from multirank.dynkw import autoDynKWRupt, DynMultiKW
+from multirank.multirank import multirank
 
 print("Example of the change-point detection test:")
 
