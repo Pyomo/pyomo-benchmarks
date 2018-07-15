@@ -10,6 +10,8 @@ import csv
 import copy
 import plotly.offline
 from plotly.graph_objs import *
+from plotly import tools
+from multirank.dynkw import autoDynKWRupt
 
 colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:purple', 'xkcd:orange', 
           'xkcd:light blue', 'xkcd:teal', 'xkcd:magenta', 'xkcd:grey',
@@ -1377,7 +1379,6 @@ elif sys.argv[1] == "23":
             _baseline = {}
             for python in _python:
                 x_, y_ = lines.get( (python, problem, fileformat, "master"), (None, None))
-                #print((python, problem, fileformat, "master", _x, _y))
                 _val[python] = None
                 _baseline[python] = None
                 if x_ is not None:
@@ -1387,8 +1388,6 @@ elif sys.argv[1] == "23":
                     if val is not None:
                         _baseline[python] = float(val)
                     traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=python, text=dates) )
-                #if _val[python] is None:
-                #    print((problem, fileformat, python, x_ is None, val, y_[-1] if y_ is not None else -1, _val[python]))
             data = ( traces )
 
             fname = "dog23b_%s_%s.html" % (problem, fileformat)
@@ -1409,6 +1408,118 @@ elif sys.argv[1] == "23":
                 fig = Figure(data=data, layout=layout)
                 plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
 
+    #
+    # GRAPHS 3
+    #
+    if False:
+        for fileformat in _formats:
+            for python in _python:
+                traces = []
+                for problem in _problems:
+                    x_, y_ = lines.get( (python, problem, fileformat, "master"), (None, None))
+                    if x_ is not None:
+                        i = len(y_)-1
+                        while i >= 0 and y_[i] is None:
+                            i = i - 1
+                        y__ = copy.copy(y_)
+                        if i >= 0:
+                            val = y__[i]
+                            for j in range(len(y__)):
+                                if y__[j] is not None:
+                                    y__[j] /= val
+                            traces.append( Scatter(x=x_, y=y__, mode='lines+markers', name=problem, text=dates) )
+                data = ( traces )
+
+                fname = "dog23_relative_%s_%s.html" % (fileformat, python)
+                xaxis = dict(
+                            title="Performance Relative to Current Performance", 
+                            tickmode="array", 
+                            tickvals=x_, 
+                            ticktext=[str(v) for v in x_],
+                            showticklabels=True, 
+                            )
+                layout = Layout( 
+                            title="Python=%s  Fileformat=%s" % (python, fileformat),
+                            showlegend=True,
+                            xaxis=xaxis,
+                            yaxis=dict(title="Runtime (Seconds)") )
+                fig = Figure(data=data, layout=layout)
+                plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
+
+    #
+    # GRAPHS 4
+    #
+    for fileformat in _formats:
+        for python in _python:
+            traces = []
+            ignore = set()
+            vals_ = []
+            for problem in _problems:
+                x_, y_ = lines.get( (python, problem, fileformat, "master"), (None, None))
+                if x_ is not None:
+                    npoints = len(y_)
+                    i = npoints-1
+                    while i >= 0 and y_[i] is None:
+                        i = i - 1
+                    if i >= 0:
+                        for i in range(npoints):
+                            if y_[i] is None:
+                                ignore.add(i)
+                        vals_.append(y_)
+                        traces.append( Scatter(x=x_, y=y_, mode='lines+markers', name=problem, text=dates) )
+            data = ( traces )
+            if len(data) == 0:
+                print("WARNING: No plots for Python=%s FileFormat=%s" % (python, fileformat))
+                continue
+
+            #
+            # Compute change points
+            #
+            #print(("NPOINTS", npoints))
+            #print(("NIGNORE", len(ignore)))
+            vals = np.zeros( (len(traces), npoints-len(ignore)) )
+            breaks = []
+            breakmap = [None]*(npoints-len(ignore))
+            for i, y_ in enumerate(vals_):
+                k = 0
+                for j, val in enumerate(y_):
+                    if j not in ignore:
+                        vals[i, k] = val
+                        breakmap[k] = j
+                        k += 1
+            numCh,chP = autoDynKWRupt(vals)
+            print((python, fileformat))
+            print(("numCh", numCh))
+            for i in range(numCh):
+                print(breakmap[chP[i]])
+                #for j, y_ in enumerate(vals_):
+                    #traces.append( Scatter(x=[breaks[i]]*2, y=[min(vals_[i])val]*len(x_), mode='lines')
+
+            #
+            # Create graph
+            #
+            fig = tools.make_subplots(rows=len(traces), cols=1, shared_yaxes=False, shared_xaxes=True)
+            for i in range(len(traces)):
+                fig.append_trace( traces[i], i+1, 1 )
+                for j in range(numCh):
+                    fig.append_trace( Scatter(x=[breakmap[chP[j]]-48.5]*2, y=[min(v for v in vals_[i] if v is not None), max(v for v in vals_[i] if v is not None)], mode='lines', showlegend=False, line=dict(color="black", width=3)), i+1, 1 )
+            fname = "dog23_stacked_%s_%s.html" % (fileformat, python)
+            xaxis = dict(
+                        title="Performance Relative to Current Performance", 
+                        tickmode="array", 
+                        tickvals=x_, 
+                        ticktext=[str(v) for v in x_],
+                        showticklabels=True, 
+                        )
+            #print(type(fig))
+            #print(fig['layout'])
+            fig['layout'].update(
+                        title="Python=%s  Fileformat=%s" % (python, fileformat),
+                        showlegend=True,
+                        height=100*len(data))
+                        #yaxis=dict(title="Runtime (Seconds)") )
+                        #xaxis=xaxis)
+            plotly.offline.plot( fig, filename='results/'+fname, auto_open=False )
 
     #
     # Create main file
@@ -1553,6 +1664,53 @@ elif sys.argv[1] == "23":
                                 OUTPUT.write('<td align="right" class="fast"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
                             else:
                                 OUTPUT.write('<td align="right" class="very_fast"><a class="dark" href="%s">%2.2f</a></td>' % (_url,_val))
+            OUTPUT.write("</tr>\n")
+        OUTPUT.write("</table>\n")
+        OUTPUT.write("<hr>\n")
+
+        #
+        # Relative Graph
+        #
+        if False:
+            OUTPUT.write("<h3>Relative Performance Trends</h3>\n")
+            OUTPUT.write("<p>The following graph shows the performance trends relative to the runtime of the latest execution of the Pyomo master branch.</p>\n")
+            OUTPUT.write("<p>The runtime measure includes the time to generate a Pyomo model and write a problem file (in various formats).</p>\n")
+            OUTPUT.write("<p></p>\n")
+            OUTPUT.write('<table>\n')
+            # HEADER
+            OUTPUT.write("<tr>\n")
+            OUTPUT.write('<td></td>')
+            for fileformat in _formats:
+                OUTPUT.write('<td class="python">%s</td>' % fileformat)
+            OUTPUT.write("</tr>\n")
+            # FILE FORMATS
+            for python in _python:
+                OUTPUT.write('<td align="left" class="problem">%s</td>' % python)
+                for fileformat in _formats:
+                    OUTPUT.write('<td><a align="center" href="dog23_relative_%s_%s.html">___</a></td>' % (fileformat, python))
+                OUTPUT.write("</tr>\n")
+            OUTPUT.write("</table>\n")
+            OUTPUT.write("<hr>\n")
+
+        #
+        # Stacked Graphs
+        #
+        OUTPUT.write("<h3>Performance Trends</h3>\n")
+        OUTPUT.write("<p>The following graphs show the performance trends relative to the runtime of the latest execution of the Pyomo master branch.</p>\n")
+        OUTPUT.write("<p>The runtime measure includes the time to generate a Pyomo model and write a problem file (in various formats).</p>\n")
+        OUTPUT.write("<p></p>\n")
+        OUTPUT.write('<table>\n')
+        # HEADER
+        OUTPUT.write("<tr>\n")
+        OUTPUT.write('<td></td>')
+        for fileformat in _formats:
+            OUTPUT.write('<td class="python">%s</td>' % fileformat)
+        OUTPUT.write("</tr>\n")
+        # FILE FORMATS
+        for python in _python:
+            OUTPUT.write('<td align="left" class="problem">%s</td>' % python)
+            for fileformat in _formats:
+                OUTPUT.write('<td><a align="center" href="dog23_stacked_%s_%s.html">___</a></td>' % (fileformat, python))
             OUTPUT.write("</tr>\n")
         OUTPUT.write("</table>\n")
         OUTPUT.write("<hr>\n")
