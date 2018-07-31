@@ -3,8 +3,11 @@
 #echo "SKIPPING RUNDOG"
 #exit 0
 
-mkdir -p results
-\rm results/*
+if [ -d results ]; then
+    \rm -f results/* ;
+else
+    mkdir -p results ;
+fi
 
 ./versions/python3.6-master/bin/python dog2 23 convertL # ADD BRANCHES HERE
 
