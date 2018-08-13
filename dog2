@@ -13,12 +13,10 @@ from plotly.graph_objs import *
 from plotly import tools
 from multirank.dynkw import autoDynKWRupt
 import random
-import urllib
 
-url = 'http://xkcd.com/color/rgb.txt'
-page = urllib.request.urlopen(url)
 xkcd_colors = {}
-for line in page:
+with open('rgb.txt', 'r') as colors:
+  for line in page:
     line_ = line.decode('ascii')
     if 'License' in line_:
         continue
