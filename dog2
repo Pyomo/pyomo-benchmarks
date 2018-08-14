@@ -16,7 +16,7 @@ import random
 
 xkcd_colors = {}
 with open('rgb.txt', 'r') as colors:
-  for line in page:
+  for line in colors:
     line_ = line.decode('ascii')
     if 'License' in line_:
         continue
