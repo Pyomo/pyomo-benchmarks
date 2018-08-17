@@ -23,7 +23,7 @@ with open('rgb.txt', 'r') as colors:
     name, color = line.split('#')
     name = name.strip()
     color = color.strip()
-    xkcd_colors['xkcd:'+name] = color
+    xkcd_colors['xkcd:'+name] = '#'+color
 
 colors = ['xkcd:red', 'xkcd:brown', 'xkcd:blue', 'xkcd:electric purple', 'xkcd:orange', 
           'xkcd:light blue', 'xkcd:teal', 'xkcd:magenta', 'xkcd:grey',
