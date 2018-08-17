@@ -18,9 +18,9 @@ xkcd_colors = {}
 with open('rgb.txt', 'r') as colors:
   for line in colors:
     #line_ = line.decode('ascii')
-    if 'License' in line_:
+    if 'License' in line:
         continue
-    name, color = line_.split('#')
+    name, color = line.split('#')
     name = name.strip()
     color = color.strip()
     xkcd_colors['xkcd:'+name] = color
